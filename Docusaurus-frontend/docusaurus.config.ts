@@ -75,9 +75,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     algolia: {
-      appId: 'YOUR_APP_ID',
-      apiKey: 'YOUR_SEARCH_API_KEY',
-      indexName: 'YOUR_INDEX_NAME',
+      appId: null, // 'YOUR_APP_ID'
+      apiKey: null, // 'YOUR_SEARCH_API_KEY'
+      indexName: null, // 'YOUR_INDEX_NAME'
       contextualSearch: true,
     },
     navbar: {
@@ -160,7 +160,7 @@ const config: Config = {
         tagName: 'meta',
         attributes: {
           'http-equiv': 'Content-Security-Policy',
-          content: "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; img-src 'self' data: blob:; connect-src 'self' https://*.algolia.net;",
+          content: "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://fonts.gstatic.com https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://*.algolia.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com;",
         },
       },
     ],

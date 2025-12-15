@@ -17,3 +17,11 @@ build/
 .env*
 .docusaurus/
 .d.ts
+
+# Universal Ignore Patterns
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
