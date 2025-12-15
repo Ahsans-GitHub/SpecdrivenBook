@@ -55,3 +55,7 @@ Simulation is the indispensable bridge between theoretical robotics and real-wor
 ### Conclusion
 
 Chapter 3 empowers you with the ability to create, manipulate, and leverage virtual robotics environments. You've gained a deep understanding of simulation as a powerful tool for developing, testing, and training AI-powered robots, laying the groundwork for integrating advanced platforms like NVIDIA Isaac and exploring real-world humanoid applications.
+
+## Modules in this Chapter
+
+*   **[Module 2: The Digital Twin (Gazebo & Unity)](/docs/chapter3/module2-detailing)**: This module focuses on physics simulation and environment building.

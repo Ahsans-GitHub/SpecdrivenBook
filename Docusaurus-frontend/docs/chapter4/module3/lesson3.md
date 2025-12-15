@@ -1,6 +1,6 @@
 ---
 id: lesson3
-title: Nav2 for Bipedal Movement
+title: "Nav2 for Bipedal Movement"
 slug: /chapter4/module3/lesson3
 ---
 

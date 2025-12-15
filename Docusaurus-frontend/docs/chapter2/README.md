@@ -68,3 +68,7 @@ We'll also discuss how to handle GPU configurations within these environments fo
 ### Conclusion
 
 Chapter 2 provides a comprehensive foundation in ROS 2, empowering you to create modular, robust, and scalable robotic applications. You've learned to navigate its architecture, implement communication patterns, and describe your robot's physical form. This knowledge is indispensable for the subsequent chapters, where we will simulate these robots in virtual environments and infuse them with advanced AI capabilities.
+
+## Modules in this Chapter
+
+*   **[Module 1: The Robotic Nervous System (ROS 2)](/docs/chapter2/module1-detailing)**: This module focuses on the core concepts of ROS 2 middleware for robot control.

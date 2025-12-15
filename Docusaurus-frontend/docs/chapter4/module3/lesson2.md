@@ -1,6 +1,6 @@
 ---
 id: lesson2
-title: Isaac ROS VSLAM & Navigation
+title: "Isaac ROS VSLAM & Navigation"
 slug: /chapter4/module3/lesson2
 ---
 

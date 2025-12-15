@@ -1,6 +1,6 @@
 ---
 id: lesson2
-title: Cognitive Planning with LLMs for ROS Actions
+title: "Cognitive Planning with LLMs for ROS Actions"
 slug: /chapter5/module4/lesson2
 ---
 

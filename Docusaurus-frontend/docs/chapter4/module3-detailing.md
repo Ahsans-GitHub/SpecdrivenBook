@@ -1,6 +1,6 @@
 ---
 id: module3-detailing
-title: Module 3: The AI-Robot Brain (NVIDIA Isaac™)
+title: "Module 3: The AI-Robot Brain (NVIDIA Isaac™)"
 slug: /chapter4/module3-detailing
 ---
 

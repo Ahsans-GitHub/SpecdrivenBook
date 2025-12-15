@@ -1,6 +1,6 @@
 ---
 id: lesson4
-title: Integrated Visualization
+title: "Integrated Visualization"
 slug: /chapter3/module2/lesson4
 ---
 

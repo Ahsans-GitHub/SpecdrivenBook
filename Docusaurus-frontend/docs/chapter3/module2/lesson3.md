@@ -1,6 +1,6 @@
 ---
 id: lesson3
-title: Simulating Sensors (LiDAR, Depth Cameras, IMUs)
+title: "Simulating Sensors (LiDAR, Depth Cameras, IMUs)"
 slug: /chapter3/module2/lesson3
 ---
 

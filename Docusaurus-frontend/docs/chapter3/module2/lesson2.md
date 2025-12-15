@@ -1,6 +1,6 @@
 ---
 id: lesson2
-title: High-fidelity Rendering and HRI in Unity
+title: "High-fidelity Rendering and HRI in Unity"
 slug: /chapter3/module2/lesson2
 ---
 

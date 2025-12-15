@@ -53,3 +53,7 @@ Humanoid robotics represents the pinnacle of embodied AI, blending complex mecha
 ### Conclusion
 
 Chapter 5 culminates your understanding of humanoid development, equipping you with the knowledge of kinematics, dynamics, advanced manipulation, and safe human-robot interaction. This deep dive into the complexities of human-like robots positions you to tackle the final frontier of conversational AI and capstone projects, bringing your embodied AI creations to life.
+
+## Modules in this Chapter
+
+*   **[Module 4: Vision-Language-Action (VLA)](/docs/chapter5/module4-detailing)**: This module focuses on the convergence of LLMs and Robotics.

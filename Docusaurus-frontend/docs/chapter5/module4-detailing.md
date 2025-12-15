@@ -1,6 +1,6 @@
 ---
 id: module4-detailing
-title: Module 4: Vision-Language-Action (VLA)
+title: "Module 4: Vision-Language-Action (VLA)"
 slug: /chapter5/module4-detailing
 ---
 

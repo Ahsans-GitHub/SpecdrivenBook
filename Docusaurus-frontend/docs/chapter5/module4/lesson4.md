@@ -1,6 +1,6 @@
 ---
 id: lesson4
-title: Capstone Autonomous Humanoid
+title: "Capstone Autonomous Humanoid"
 slug: /chapter5/module4/lesson4
 ---
 

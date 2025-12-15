@@ -1,6 +1,6 @@
 ---
 id: lesson4
-title: Advanced Integration
+title: "Advanced Integration"
 slug: /chapter2/module1/lesson4
 ---
 

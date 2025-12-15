@@ -1,6 +1,6 @@
 ---
 id: module1-detailing
-title: Module 1: The Robotic Nervous System (ROS 2)
+title: "Module 1: The Robotic Nervous System (ROS 2)"
 slug: /chapter2/module1-detailing
 ---
 

@@ -7,7 +7,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Physical AI & Humanoid Robotics Textbook',
   tagline: 'Bridging Digital Cognition with Physical Embodiment',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/humanoid.png',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -74,17 +74,12 @@ const config: Config = {
     colorMode: {
       respectPrefersColorScheme: true,
     },
-    algolia: {
-      appId: null, // 'YOUR_APP_ID'
-      apiKey: null, // 'YOUR_SEARCH_API_KEY'
-      indexName: null, // 'YOUR_INDEX_NAME'
-      contextualSearch: true,
-    },
+
     navbar: {
       title: 'Physical AI & Humanoid Robotics',
       logo: {
         alt: 'Physical AI & Humanoid Robotics Logo',
-        src: 'img/logo.svg',
+        src: 'img/humanoid.png',
       },
       items: [
         {

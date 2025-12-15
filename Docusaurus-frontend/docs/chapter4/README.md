@@ -55,3 +55,7 @@ NVIDIA Isaac represents a powerful ecosystem for accelerating AI and robotics de
 ### Conclusion
 
 Chapter 4 equips you with the knowledge and tools to leverage the NVIDIA Isaac ecosystem for accelerated AI and robotics development. You've learned to generate synthetic data, implement advanced perception and manipulation, and deploy robust ML models on edge hardware. This mastery is crucial for tackling the complexities of humanoid development and conversational robotics in the subsequent chapters.
+
+## Modules in this Chapter
+
+*   **[Module 3: The AI-Robot Brain (NVIDIA Isaac™)](/docs/chapter4/module3-detailing)**: This module focuses on advanced perception and training.

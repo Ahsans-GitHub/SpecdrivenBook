@@ -1,6 +1,6 @@
 ---
 id: lesson3
-title: Multi-modal Interaction (Speech/Gesture/Vision)
+title: "Multi-modal Interaction (Speech/Gesture/Vision)"
 slug: /chapter5/module4/lesson3
 ---
 

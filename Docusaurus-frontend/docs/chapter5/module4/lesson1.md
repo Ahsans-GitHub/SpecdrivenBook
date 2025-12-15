@@ -1,6 +1,6 @@
 ---
 id: lesson1
-title: Voice-to-Action with OpenAI Whisper
+title: "Voice-to-Action with OpenAI Whisper"
 slug: /chapter5/module4/lesson1
 ---
 

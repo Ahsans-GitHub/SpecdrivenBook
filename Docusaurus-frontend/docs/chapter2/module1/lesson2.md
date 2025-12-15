@@ -1,6 +1,6 @@
 ---
 id: lesson2
-title: Bridging Python Agents to ROS Controllers using rclpy
+title: "Bridging Python Agents to ROS Controllers using rclpy"
 slug: /chapter2/module1/lesson2
 ---
 

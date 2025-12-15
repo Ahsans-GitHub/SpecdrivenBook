@@ -1,6 +1,6 @@
 --- 
 id: lesson1
-title: ROS 2 Nodes, Topics, and Services
+title: "ROS 2 Nodes, Topics, and Services"
 slug: /chapter2/module1/lesson1
 ---
 

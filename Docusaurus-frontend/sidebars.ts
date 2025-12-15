@@ -20,7 +20,7 @@ const sidebars: SidebarsConfig = {
       label: 'Chapter 1: Introduction to Physical AI',
       link: {
         type: 'doc',
-        id: 'chapter1/README', // Assuming README.md serves as overview
+        id: 'chapter1/chapter1-overview',
       },
       items: [
         {
@@ -31,10 +31,10 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Chapter 2',
+      label: 'Chapter 2: ROS 2 Fundamentals',
       link: {
         type: 'doc',
-        id: 'chapter2', // Link to docs/chapter2.md
+        id: 'chapter2/chapter2-overview',
       },
       items: [
         {
@@ -42,7 +42,7 @@ const sidebars: SidebarsConfig = {
           label: 'Module 1: The Robotic Nervous System (ROS 2)',
           link: {
             type: 'doc',
-            id: 'chapter2/module1-detailing', // Link to docs/chapter2/module1-detailing.md
+            id: 'chapter2/module1-detailing',
           },
           items: [
             'chapter2/module1/lesson1',
@@ -55,10 +55,10 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Chapter 3',
+      label: 'Chapter 3: Robot Simulation',
       link: {
         type: 'doc',
-        id: 'chapter3', // Link to docs/chapter3.md
+        id: 'chapter3/chapter3-overview',
       },
       items: [
         {
@@ -66,7 +66,7 @@ const sidebars: SidebarsConfig = {
           label: 'Module 2: The Digital Twin (Gazebo & Unity)',
           link: {
             type: 'doc',
-            id: 'chapter3/module2-detailing', // Link to docs/chapter3/module2-detailing.md
+            id: 'chapter3/module2-detailing',
           },
           items: [
             'chapter3/module2/lesson1',
@@ -79,10 +79,10 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Chapter 4',
+      label: 'Chapter 4: NVIDIA Isaac Integration',
       link: {
         type: 'doc',
-        id: 'chapter4', // Link to docs/chapter4.md
+        id: 'chapter4/chapter4-overview',
       },
       items: [
         {
@@ -90,7 +90,7 @@ const sidebars: SidebarsConfig = {
           label: 'Module 3: The AI-Robot Brain (NVIDIA Isaac™)',
           link: {
             type: 'doc',
-            id: 'chapter4/module3-detailing', // Link to docs/chapter4/module3-detailing.md
+            id: 'chapter4/module3-detailing',
           },
           items: [
             'chapter4/module3/lesson1',
@@ -103,10 +103,10 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Chapter 5',
+      label: 'Chapter 5: Humanoid Development',
       link: {
         type: 'doc',
-        id: 'chapter5', // Link to docs/chapter5.md
+        id: 'chapter5/chapter5-overview',
       },
       items: [
         {
@@ -114,7 +114,7 @@ const sidebars: SidebarsConfig = {
           label: 'Module 4: Vision-Language-Action (VLA)',
           link: {
             type: 'doc',
-            id: 'chapter5/module4-detailing', // Link to docs/chapter5/module4-detailing.md
+            id: 'chapter5/module4-detailing',
           },
           items: [
             'chapter5/module4/lesson1',

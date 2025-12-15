@@ -1,6 +1,6 @@
 ---
 id: lesson1
-title: NVIDIA Isaac Sim Photorealism & Synthetic Data
+title: "NVIDIA Isaac Sim Photorealism & Synthetic Data"
 slug: /chapter4/module3/lesson1
 ---
 

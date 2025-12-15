@@ -1,6 +1,6 @@
 ---
 id: lesson1
-title: Simulating Physics, Gravity, Collisions in Gazebo
+title: "Simulating Physics, Gravity, Collisions in Gazebo"
 slug: /chapter3/module2/lesson1
 ---
 

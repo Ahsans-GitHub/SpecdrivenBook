@@ -1,6 +1,6 @@
 ---
 id: lesson3
-title: Understanding URDF for Humanoids
+title: "Understanding URDF for Humanoids"
 slug: /chapter2/module1/lesson3
 ---
 

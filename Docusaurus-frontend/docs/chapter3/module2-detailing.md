@@ -1,6 +1,6 @@
 ---
 id: module2-detailing
-title: Module 2: The Digital Twin (Gazebo & Unity)
+title: "Module 2: The Digital Twin (Gazebo & Unity)"
 slug: /chapter3/module2-detailing
 ---
 

@@ -1,6 +1,6 @@
 ---
 id: lesson4
-title: Sim-to-Real Techniques
+title: "Sim-to-Real Techniques"
 slug: /chapter4/module3/lesson4
 ---
 

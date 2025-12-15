@@ -2,17 +2,46 @@
  * CSS files with the .module.css suffix will be treated as CSS modules
  * and scoped locally.
  */
-
+.heroBookIcon {
+  height: 150px; /* Adjust as needed */
+  width: 150px;  /* Adjust as needed */
+  margin-bottom: 1rem;
+}
 .heroBanner {
   padding: 4rem 0;
   text-align: center;
   position: relative;
   overflow: hidden;
+  display: flex; /* Make heroBanner a flex container */
+  justify-content: center; /* Center content initially */
+  align-items: center;
+}
+
+.heroContainer {
+  display: flex;
+  justify-content: space-between; /* Pushes content to sides */
+  align-items: flex-start; /* Align items to the top */
+  width: 100%; /* Ensure it takes full width of its parent */
+  max-width: var(--ifm-container-width); /* Match Docusaurus container width */
+  padding: 0 var(--ifm-spacing-horizontal); /* Add padding for consistency */
+}
+
+.heroMainContent {
+  flex-grow: 1; /* Allow main content to take available space */
+  text-align: center;
 }
 
 @media screen and (max-width: 996px) {
   .heroBanner {
     padding: 2rem;
+  }
+  .heroContainer {
+    flex-direction: column; /* Stack vertically on small screens */
+    align-items: center;
+  }
+  .quickLinksContainer {
+    margin-top: 2rem; /* Add space when stacked */
+    width: 100%;
   }
 }
 
@@ -20,4 +49,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.quickLinksContainer {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.quickLinksTitle {
+  color: var(--ifm-hero-text-color);
+  margin-bottom: 1rem;
+}
+
+.quickLinksList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Space between links */
+  align-items: center;
+}
+
+.quickLinksList li {
+  width: 100%;
+  max-width: 300px; /* Adjust as needed */
 }
