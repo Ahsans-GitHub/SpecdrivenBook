@@ -15,14 +15,14 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://User.github.io',
+  url: 'https://Ahsans-GitHub.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/SpecdrivenBook/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'User', // Usually your GitHub org/user name.
+  organizationName: 'Ahsans-GitHub', // Usually your GitHub org/user name.
   projectName: 'SpecdrivenBook', // Usually your repo name.
 
   onBrokenLinks: 'throw',
@@ -99,7 +99,7 @@ const config: Config = {
           position: 'left',
         },
         {
-          href: 'https://github.com/User/SpecdrivenBook',
+          href: 'https://github.com/Ahsans-GitHub/SpecdrivenBook',
           label: 'GitHub',
           position: 'right',
         },
@@ -139,7 +139,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/User/SpecdrivenBook',
+              href: 'https://github.com/Ahsans-GitHub/SpecdrivenBook',
             },
           ],
         },
