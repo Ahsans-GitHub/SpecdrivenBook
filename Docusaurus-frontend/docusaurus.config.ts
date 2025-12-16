@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Physical AI & Humanoid Robotics Textbook',
   tagline: 'Bridging Digital Cognition with Physical Embodiment',
-  favicon: 'img/humanoid.png',
+  favicon: '/img/humanoid.png',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -14,12 +14,18 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://Ahsans-GitHub.github.io',
+  // url: 'https://Ahsans-GitHub.github.io',
+  // url: 'https://your-docusaurus-site.example.com',
+  url: 'https://specdriven-book-msf4.vercel.app',
   // url: 'https://github.com/Ahsans-GitHub',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/SpecdrivenBook/',
-
+  baseUrl: '/',
+  organizationName: 'Ahsans-GitHub', // Usually your GitHub org/user name.
+  projectName: 'SpecdrivenBook', // Usually your repo name.
+  deploymentBranch: 'gh-pages',
+  trailingSlash: false,
+  onBrokenLinks: 'ignore',
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
@@ -63,7 +69,7 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: '/img/docusaurus-social-card.jpg',
     colorMode: {
       respectPrefersColorScheme: true,
     },
@@ -72,7 +78,7 @@ const config: Config = {
       title: 'Physical AI & Humanoid Robotics',
       logo: {
         alt: 'Physical AI & Humanoid Robotics Logo',
-        src: 'img/humanoid.png',
+        src: '/img/humanoid.png',
       },
       items: [
         {
