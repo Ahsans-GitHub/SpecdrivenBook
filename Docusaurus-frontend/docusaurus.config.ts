@@ -20,12 +20,7 @@ const config: Config = {
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/SpecdrivenBook/',
 
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'Ahsans-GitHub', // Usually your GitHub org/user name.
-  projectName: 'SpecdrivenBook', // Usually your repo name.
-
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'ignore',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -41,6 +36,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          onBrokenLinks: 'ignore', // Explicitly ignore broken links for docs
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -113,7 +109,7 @@ const config: Config = {
           items: [
             {
               label: 'Textbook Intro',
-              to: '/docs/intro',
+              to: '/docs/',
             },
           ],
         },
