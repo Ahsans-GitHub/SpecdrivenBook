@@ -21,11 +21,12 @@ const config: Config = {
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
-  organizationName: 'Ahsans-GitHub', // Usually your GitHub org/user name.
-  projectName: 'SpecdrivenBook', // Usually your repo name.
+  organizationName: 'Ahsans-GitHub', // Correct value for your GitHub org/user name.
+  projectName: 'SpecdrivenBook', // Correct value for your repo name.
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
-  onBrokenLinks: 'ignore',
+  onBrokenLinks: 'ignore', // To allow Vercel build to pass
+
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
