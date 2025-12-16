@@ -1,0 +1,132 @@
+.moduleCards {
+  padding: 2rem 0;
+  width: 100%;
+}
+
+.featureCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: var(--ifm-card-border-radius);
+  box-shadow: var(--ifm-shadow-md);
+  transition: transform 0.3s ease-in-out;
+  margin-bottom: 2rem; /* Spacing between cards */
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+}
+
+.featureCard .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.featureCard .card__header {
+  padding: var(--ifm-card-padding);
+  text-align: center;
+  border-bottom: 1px solid var(--ifm-fieldset-border-color);
+}
+
+.featureCard .card__header h3 {
+  margin-bottom: 0;
+  font-size: 1.25rem; /* Smaller title */
+}
+
+.featureCard .card__body {
+  flex-grow: 1;
+  padding: var(--ifm-card-padding);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem; /* Smaller body text */
+}
+
+.featureSvg {
+  height: 80px; /* Smaller image */
+  width: 80px;
+  margin-bottom: 0.5rem;
+  display: block; /* Ensure image is block for margin auto to work */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mainDescription {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.subsections {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.subsectionItem {
+  margin-bottom: 0.6rem;
+}
+
+.subsectionItem h4 {
+  font-size: 1rem; /* Smaller subheading */
+  margin-bottom: 0.2rem;
+  color: var(--ifm-color-primary);
+}
+
+.subsectionItem p {
+  font-size: 0.8rem; /* Smaller subsection content */
+  line-height: 1.3;
+  margin-bottom: 0;
+}
+
+.lessonOutcomes {
+  margin-top: auto; /* Pushes to the bottom */
+  padding-top: 1rem;
+  border-top: 1px solid var(--ifm-fieldset-border-color);
+}
+
+.lessonOutcomes h4 {
+  font-size: 1.1rem; /* Smaller learning outcomes heading */
+  margin-bottom: 0.5rem;
+}
+
+.lessonOutcomes ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.lessonOutcomes li {
+  margin-bottom: 0.3rem;
+}
+
+.lessonOutcomes li a {
+  text-decoration: none;
+  color: var(--ifm-color-primary-dark);
+  font-size: 0.85rem; /* Smaller lesson link */
+  font-weight: bold;
+}
+
+.lessonOutcomes li a:hover {
+  text-decoration: underline;
+}
+
+.lessonDefinition {
+  font-size: 0.75rem; /* Smaller lesson definition */
+  margin-top: 0.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--ifm-font-color-secondary);
+}
+
+.card__footer {
+  padding: var(--ifm-card-padding);
+  border-top: 1px solid var(--ifm-fieldset-border-color);
+  text-align: center;
+}
+
+
+@media screen and (max-width: 996px) {
+  .featureCard {
+    margin-bottom: 2rem;
+  }
+}
