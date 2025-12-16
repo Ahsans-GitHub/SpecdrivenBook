@@ -14,8 +14,8 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  // url: 'https://Ahsans-GitHub.github.io',
-  url: 'https://github.com/Ahsans-GitHub',
+  url: 'https://Ahsans-GitHub.github.io',
+  // url: 'https://github.com/Ahsans-GitHub',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/SpecdrivenBook/',
