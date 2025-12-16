@@ -24,7 +24,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'ROS2 & Robotics Middleware',
-    imageSrc: '/img/ros2-category.png',
+    imageSrc: '/img/ros2.png',
     description: (
       <>
         Master the neural nervous system of robots. Dive deep into nodes, topics, and services 
@@ -55,7 +55,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Digital Twin & Physics Sim',
-    imageSrc: '/img/digital-twin-category.png',
+    imageSrc: '/img/digital.png',
     description: (
       <>
         Bridge the sim-to-real gap. Leverage Gazebo and Unity to create high-fidelity 
@@ -86,7 +86,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'AI Brain (Isaac)',
-    imageSrc: '/img/edge-ai-category.png',
+    imageSrc: '/img/edge.png',
     description: (
       <>
         Deploy intelligence to the edge. Explore hardware requirements, quantum-crypto trends, 
