@@ -14,18 +14,15 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  // url: 'https://Ahsans-GitHub.github.io',
   // url: 'https://your-docusaurus-site.example.com',
-  url: 'https://specdriven-book-msf4.vercel.app',
-  // url: 'https://github.com/Ahsans-GitHub',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
-  organizationName: 'Ahsans-GitHub', // Correct value for your GitHub org/user name.
+  organizationName: 'your-username', // Correct value for your GitHub org/user name.
   projectName: 'SpecdrivenBook', // Correct value for your repo name.
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
-  onBrokenLinks: 'ignore', // To allow Vercel build to pass
+  onBrokenLinks: 'throw',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
