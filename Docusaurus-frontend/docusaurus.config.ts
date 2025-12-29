@@ -14,14 +14,11 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  // url: 'https://Ahsans-GitHub.github.io',
-  // url: 'https://your-docusaurus-site.example.com',
-  url: 'https://specdriven-book-msf4.vercel.app',
-  // url: 'https://github.com/Ahsans-GitHub',
+  url: 'https://physicalaiandhumanoidrobotics.vercel.app/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
-  organizationName: 'Ahsans-GitHub', // Correct value for your GitHub org/user name.
+  organizationName: 'your-username', // Correct value for your GitHub org/user name.
   projectName: 'SpecdrivenBook', // Correct value for your repo name.
   deploymentBranch: 'gh-pages',
   trailingSlash: false,

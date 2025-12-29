@@ -1,109 +1,104 @@
 <!--
     Sync Impact Report:
-    - Version change: N/A -> 1.0.0
+    - Version change: 1.0.0 -> 1.1.0
     - List of modified principles:
-        - [PRINCIPLE_1_NAME] -> Hands-On Learning Focus
-        - [PRINCIPLE_2_NAME] -> Multi-Level Accessibility
-        - [PRINCIPLE_3_NAME] -> Content Density and Richness
-        - [PRINCIPLE_4_NAME] -> Cross-Platform Compatibility
-        - [PRINCIPLE_5_NAME] -> AI-Native and Interactive Design
-        - [PRINCIPLE_6_NAME] -> Spec-Driven Development
-        - New Principle -> Tech Stack Integrity
-        - New Principle -> Ethical and Inclusive Education
-    - Added sections: Vision, Success Criteria, Constraints, Stakeholders, Brand Voice and Style, Mission, Architecture Principles, Risks & Mitigation, Definition of Done
-    - Removed sections: [SECTION_2_NAME], [SECTION_3_NAME]
+        - [Renamed] "Hands-On Learning Focus" -> "Hands-On & Hardware-Aware Learning"
+        - [Renamed] "Content Density and Richness" -> "Analytical Depth & Research Density"
+        - [Added] "Defensive Programming & Input Paranoia"
+        - [Added] "Robotics-Specific Rigor & Upgradability"
+    - Added sections: N/A (Updates within existing sections)
+    - Removed sections: N/A
     - Templates requiring updates:
         - ✅ .specify/templates/plan-template.md
         - ✅ .specify/templates/spec-template.md
         - ✅ .specify/templates/tasks-template.md
-        - ⚠ .claude/commands/sp.plan.md (Manual check recommended for alignment)
-        - ⚠ .claude/commands/sp.specify.md (Manual check recommended for alignment)
-        - ⚠ .claude/commands/sp.tasks.md (Manual check recommended for alignment)
-        - ⚠ README.md (Manual check recommended for alignment)
     - Follow-up TODOs:
-        - TODO(RATIFICATION_DATE): Determine original adoption date.
+        - TODO(RATIFICATION_DATE): Confirm original adoption date.
 -->
+
 # Constitution for Spec-Driven Development of the "Physical AI & Humanoid Robotics" Textbook
 
 ## Vision
-The vision of this project is to create a comprehensive, interactive, and AI-native textbook titled "Teaching Physical AI & Humanoid Robotics Course" that bridges the gap between digital AI and embodied intelligence in the physical world. This textbook will serve as a unified educational platform, empowering learners from beginners to experts and researchers to master the principles and practices of Physical AI and humanoid robotics. By leveraging Spec-Kit Plus, Claude Code, and Docusaurus, the textbook will be spec-driven, ensuring structured, high-quality content generation and deployment. The end product will be a fast, simple, beautiful, and intelligent resource that feels like a real AI-powered education platform, not just a static book. It will emphasize hands-on learning, personalization, and accessibility across devices and skill levels, ultimately democratizing access to cutting-edge robotics education and inspiring the next generation of innovators in embodied AI.
+To create the definitive **Spec-Driven Book for Embodied AI**, bridging the gap between digital intelligence and physical application with uncompromising defensive safeguards. This textbook will serve as a secure, interactive platform for training high-tech upgradable robots—specifically the **Limx TRON2** (7-DoF arms, 70cm reach, 10kg payload, modular biped/wheeled modes)—while teaching the full stack from ROS 2 middleware and Gazebo/Unity simulations to NVIDIA Isaac perception and VLA capstones. We adopt a **Defensive Programming Specialist** mindset: we are paranoid about malicious inputs, strict about data types, and rigorous about error handling, ensuring the book is not just educational but a fortress of reliable, crash-proof robotic knowledge ready for future Artificial Super Intelligence (ASI) integration.
 
 ## Core Principles
 
-### Hands-On Learning Focus
-Every chapter and lesson must prioritize practical, actionable content with code examples, simulations, and exercises. Theoretical concepts should be immediately followed by hands-on implementations using tools like ROS 2, Gazebo, NVIDIA Isaac, and Unity. Encourage experimentation in simulated environments to build confidence before real-world applications.
+### Defensive Programming & Input Paranoia
+Assume all input is potentially malicious. Enforce precise data types and ranges for all interactive and simulation parameters.
+- **Strings**: User queries must be sanitized and capped (e.g., max 2000 chars) to prevent buffer overflows.
+- **Numbers**: Simulation parameters must have explicit bounds (e.g., gravity float -9.81 to 0.0; confidence scores 0.0-1.0; top_k integers 1-50).
+- **Hardware Specs**: Validate inputs for hardware configs (e.g., VRAM int 12-24GB) to avoid overflow or resource exhaustion errors.
+- **OS Validation**: Strictly validate file paths and commands for specific OS environments (Windows WSL string paths vs. Linux apt commands) to prevent injection attacks.
 
-### Multi-Level Accessibility
-Content must cater to a broad target audience—beginners (new to AI/robotics), intermediate (familiar with basics), experts (advanced practitioners), and researchers (exploring cutting-edge topics). Each chapter should include tiered sections: foundational explanations for beginners, in-depth analyses for intermediates, advanced techniques for experts, and research insights/discussions for researchers. Use progressive disclosure (e.g., expandable sections) to avoid overwhelming users.
+### Hands-On & Hardware-Aware Learning
+Content must be actionable and hardware-specific. Explicitly target **RTX workstations, Jetson Orin kits, and Unitree/Limx proxies**. Every lesson must include "Defensive Checks" where users verify their environment (e.g., `assert torch.cuda.is_available()`) before execution. Bridge the sim-to-real gap by detailing transfer protocols for TRON2, ensuring robustness against real-world failures like sensor noise or latency.
 
-### Content Density and Richness
-All content must be heavy and detailed, with each chapter containing at least 3 lessons. Cover all weeks from the course breakdown in rich detail, including code snippets, diagrams, troubleshooting tips, and real-world case studies. Ensure modules, chapters, lessons, and weeks are comprehensively fleshed out with subtopics, examples, and assessments to support RAG integration for personalized querying.
+### Analytical Depth & Research Density
+Go beyond basics. Include analytical research on upgradable kinematics/dynamics, VSLAM for dynamic multi-mode navigation, and ablation studies on balance/manipulation. Content must be "dense" for RAG ingestion—richly detailed, strictly typed, and error-safe metadata to support future AI queries.
 
-### Cross-Platform Compatibility
-Handle installations, setups, and scenarios for major operating systems (Windows, Linux, macOS) and critical edge cases (e.g., low-end hardware, cloud vs. on-premise). Provide step-by-step guides for each OS, including dependencies, potential pitfalls, and alternatives (e.g., using Docker for consistency).
+### Multi-Level Strata with Safety Gates
+Cater to all levels but enforce safety gates.
+- **Beginner**: Safety-first introductions, strict sandbox environments.
+- **Expert**: Deep dives into TRON2 firmware and NVIDIA Isaac Gym, but with warnings about physical risks.
+- **Research**: Theoretical frameworks for ASI integration and shape-shifting morphology.
 
-### AI-Native and Interactive Design
-Integrate reusable intelligence via Claude Code subagents and agent skills. The textbook should feel dynamic, with auto-generated summaries, quizzes, and learning boosters per chapter. Support personalization based on user background (e.g., Python proficiency, hardware access) and one-click Urdu translation, saved as user preferences after sign-in.
-
-### Spec-Driven Development
-Use Spec-Kit Plus to drive the project through a structured frontend workflow: constitution.md (this document), specify.md (detailed specs), plan.md (development plan), task.md (task breakdown), implement.md (implementation notes). All content generation must adhere to these specs for consistency and quality.
+### Fail-Secure Error Handling
+Distinguish between user-facing and developer-facing errors.
+- **User**: Friendly, non-technical messages (e.g., "Invalid input—please try shorter text").
+- **Developer**: Detailed logs with timestamps, stack traces, and attack indicators (via backend middleware like FastAPI).
+- **System**: Fail-closed designs—if a sensor or input is ambiguous, the system (and the code taught) must default to a safe stop state.
 
 ### Tech Stack Integrity
-Build with Docusaurus for the frontend documentation site, Context7 MCP for accessing Docusaurus and integrating with OpenAI/ChatKit, GitHub MCP for deployment via deploy.yaml in .github/workflows. Use Claude (globally routed), Gemini, Qwen, and Spec-Kit Plus for content generation and humanoid book documentation. Ensure seamless integration for Phase 1 (textbook completion) and Phase 2 (RAG chatbot).
+Build with **Docusaurus** for the frontend, strictly typed **Python** for backend logic, and **Spec-Kit Plus** for governance. Use **Context7 MCP** and **GitHub MCP** for secure deployment. Ensure all code snippets are linted, typed (mypy strict), and secure.
 
-### Ethical and Inclusive Education
-Promote safe, responsible AI practices in robotics, addressing biases in embodied systems, safety in human-robot interactions, and accessibility for diverse users. Encourage open-source contributions and community building.
+### Ethical & Secure Robotics
+Ban assistance for disallowed activities (e.g., weaponization, surveillance). Promote ethical AI, bias mitigation in embodied systems, and physical safety protocols (e.g., kill switches, e-stop implementation).
 
 ## Success Criteria
-Content Completeness: All modules (1-4), weeks (1-13), chapters (6-8 total, mapping to course structure), and lessons (minimum 3 per chapter) are fully developed with heavy, rich, detailed content. This includes foundations, simulations, hardware setups, capstone projects, assessments, and learning outcomes.
-User Experience: Clean UI in Docusaurus—fast loading (<2 seconds per page), mobile-friendly, and readable in under 45 minutes total. Personalized content visibly adapts (e.g., skipping basics for experts), Urdu translations are high-quality and instant, and interactive elements (summaries, quizzes) enhance engagement.
-Hands-On Effectiveness: At least 70% of content involves practical exercises. Users can follow setups on Windows/Linux/macOS without friction, with success measured by deployable code examples and simulations.
-RAG Readiness: Content is structured for easy ingestion into Qdrant (e.g., markdown with headers, frontmatter metadata). Post-RAG, answers are accurate, cited, and grounded in book content.
-Deployment and Stability: Textbook deployed to GitHub Pages via GitHub MCP. All features (personalization, translation) functional after sign-in using Better-Auth. Bonus points for implementing sign-up questions on user background (e.g., Python level, hardware like NVIDIA GPU) to personalize content.
-Quality Metrics: No overly long chapters (keep concise yet detailed), error-free code, and positive simulated user feedback (e.g., via quizzes passing rates). Achieve 50 extra bonus points by integrating Better-Auth for sign-up/sign-in with background questions.
+- **Defensive Robustness**: 100% of interactive inputs have defined type/range constraints. Zero unhandled exceptions in provided code examples.
+- **Content Completeness**: Full coverage of TRON2 specs (kinematics, dynamics) and the physical AI stack (ROS 2, Isaac, Gazebo).
+- **Cross-OS Validation**: explicit, tested setup guides for Windows (WSL2), Linux (Ubuntu), and macOS, with injection-proof command templates.
+- **RAG Readiness**: Content chunks are semantically structured and "poison-free" (sanitized) for safe ingestion by Phase 2 chatbots.
+- **User Safety**: Assessment pass rates >80% on safety/security modules before unlocking advanced hardware control chapters.
 
 ## Constraints
-Budget and Resources: Rely on free tiers (Qdrant Cloud, Neon Serverless Postgres) and open-source tools. Avoid heavy dependencies; use minimal npm/Python libs. Support low-end devices (phones, non-RTX laptops) by offering cloud alternatives (AWS RoboMaker, Omniverse Cloud).
-Scope Limits: Phase 1 focuses solely on textbook completion—no RAG implementation yet (reserved for Phase 2). No complex robotics code; stick to educational content. Non-goals: extra animations, long chapters, or unrelated features.
-Time and Complexity: Complete in hackathon timeline. Keep frontend simple (Docusaurus defaults), backend modular (FastAPI for Phase 2). Mitigate risks like RAG accuracy with smart chunking in advance.
-Technical: Must work with installed tools (Claude as router, Gemini, Qwen, Spec-Kit Plus). Handle truncated files via tools if needed, but assume manual setups (deploy.yaml) are done.
-Content Boundaries: No promotion of disallowed activities; focus on ethical, educational robotics.
+- **Free Tier & Open Source**: Rely on free tiers (Qdrant, Neon) but never compromise security settings (e.g., enforce SSL).
+- **Immutability**: Once published, core safety specs are immutable unless formally amended via ADR.
+- **Hardware Realities**: Must support simulation (Isaac Sim) for users without physical TRON2 robots, but enforce "Sim-to-Real" validation checks.
+- **Input Limits**: Strict caps on all user-supplied data (text length, file size, numerical ranges).
 
 ## Stakeholders
-Learners (Primary Users): Beginners to researchers seeking hands-on Physical AI education. Needs: Accessible, personalized, interactive content across devices.
-Educators/Instructors: Use the textbook for courses. Needs: Comprehensive modules, assessments, and capstone projects for teaching.
-Hackathon Organizers/Judges: Evaluate based on deliverables (Docusaurus book, RAG chatbot, personalization, translation). Bonus for Better-Auth integration.
-Developers (Us): Building with Spec-Kit Plus/Claude Code. Needs: Clear specs, reusable skills/agents for efficiency.
-Community/Researchers: Contribute to/open-source the project. Needs: Detailed, research-level insights and extensible architecture.
-Tech Providers: xAI/Grok (for assistance), OpenAI (agents/ChatKit), Cohere (embeddings), Qdrant/Neon (data), Better-Auth (auth).
+- **Learners**: Need safe, crash-proof learning paths for expensive hardware.
+- **Researchers**: Need analytical depth on VLA and upgradable morphology.
+- **Security Analysts**: Need assurance that the code provided does not introduce vulnerabilities.
+- **Hackathon Judges**: Look for "Defensive by Design" implementation and TRON2 specificity.
 
 ## Brand Voice and Style
-Tone: Enthusiastic, empowering, and approachable—like a knowledgeable mentor guiding you through exciting discoveries. Use simple language for beginners, escalating to technical precision for advanced users.
-Style: Clear, concise, and visual. Use markdown effectively: headers for structure, code blocks for examples, tables for comparisons (e.g., hardware options), lists for steps. Interweave diagrams (via tools if needed) and encourage active voice.
-Inclusivity: Gender-neutral, culturally sensitive (e.g., Urdu support). Highlight real-world impact (e.g., "Why Physical AI Matters").
-Consistency: Follow Docusaurus conventions. Brand as "Panaversity Physical AI Textbook" with modern, clean aesthetics (minimalist themes).
+- **Persona**: The **Defensive Programming Specialist** & **Robotics Architect**.
+- **Tone**: Empowering but Paranoid. "Build it, but secure it first." Expert, precise, and vigilant.
+- **Style**: High-density technical writing. Use callouts for "Security Alert" and "Hardware Check". Explicitly state data types in text (e.g., "Set the `gravity` float to...").
 
-## Mission (Reiterated for Emphasis)
-Build a fully AI-native, interactive, intelligent textbook that teaches the Physical AI & Humanoid Robotics course. The product must be fast, simple, beautiful, and feel like a REAL AI-powered education platform not just a book.
+## Mission
+To build the world's most secure, strictly-typed, and analytically deep textbook for Physical AI, training the next generation of engineers to master the **Limx TRON2** and **NVIDIA Isaac** stack without compromising on safety, security, or rigour.
 
-## Architecture Principles (Detailed for Implementation)
-Folder Structure: /website (Docusaurus frontend), /backend (FastAPI for Phase 2), /rag (indexing/retrieval), /agents (Claude subagents), /skills (reusable skills like RAG-Indexer).
-Content Generation: Use Spec-Kit Plus to generate all modules/chapters/lessons/weeks/levels with heavy details. Map course overview: Module 1 (ROS 2) → Chapters 1-2, etc.
-Personalization/Translation: After sign-in, buttons at chapter starts for personalization (based on sign-up questions: Python knowledge, hardware background) and Urdu translation (saved preference).
-Interactive Features: Auto-summaries, quizzes per chapter. RAG popup for selected text searches.
+## Architecture Principles
+- **Docusaurus Frontend**: With client-side validation for all forms/inputs.
+- **Input Validation Layer**: All code examples include Pydantic models or equivalent validation.
+- **Error Logging**: Standardized format for simulated error reporting.
+- **RAG-Ready Structure**: Markdown headers correspond to semantic vectors; strict metadata schema.
 
 ## Risks & Mitigation
-Content Overload: Mitigate by tiered levels and short chapters.
-Cross-OS Issues: Provide explicit guides and test scenarios.
-RAG Prep: Use semantic chunking (headers, 500 tokens max, 50 overlap) for markdown files.
-Deployment Failures: Use GitHub MCP and health checks.
+- **Malicious Input**: Mitigate via strict type enforcement and sanitization (HTML escape, length limits).
+- **Hardware Damage**: Mitigate via mandatory "Sim-First" workflows and software E-stops in all code.
+- **Sim-to-Real Failure**: Mitigate via domain randomization tutorials and latency ablation studies.
 
-## Definition of Done (Phase 1)
-All content generated: 6-8 chapters covering modules/weeks, with ≥3 lessons each, rich details for all levels.
-Docusaurus site deployed, with constitution.md etc. in docs.
-Ready for Phase 2: Structured markdown for RAG ingestion.
+## Definition of Done
+- **Complete**: All modules (ROS 2 to Capstone) drafted with TRON2 specifics.
+- **Secure**: All inputs defined with types/ranges; error handling strategies documented.
+- **Upgradable**: Content addresses modular upgrades (biped to wheeled).
+- **Deployed**: Docusaurus site live with strict CSP (Content Security Policy) headers.
 
 ## Governance
-This constitution serves as the guiding prompt for Spec-Kit Plus to complete Phase 1: Generate the full textbook content, ensuring all specified elements are richly detailed and aligned with the vision. Now, proceed to specify.md for detailed specs on each chapter's content.
+This constitution serves as the secure root of trust for the project. Any deviations from defensive coding standards must be documented in an ADR.
 
-**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): Determine original adoption date. | **Last Amended**: 2025-12-10
+**Version**: 1.1.0 | **Ratified**: TODO(RATIFICATION_DATE): Determine original adoption date. | **Last Amended**: 2025-12-29

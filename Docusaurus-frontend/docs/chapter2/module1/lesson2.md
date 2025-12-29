@@ -1,317 +1,130 @@
 ---
-id: lesson2
-title: "Bridging Python Agents to ROS Controllers using rclpy"
-slug: /chapter2/module1/lesson2
+title: "Lesson 2: Nodes, Topics, Services, and Actions"
+sidebar_label: "Lesson 2: Communication"
+tags: [ros2, topics, services, actions, communication-patterns]
+level: [beginner, normal, pro, advanced, research]
+description: "Mastering the four patterns of robot communication and knowing exactly when to use each for humanoid control."
 ---
 
-# Lesson 2: Bridging Python Agents to ROS Controllers using `rclpy` - Nodes, Topics, Services, and Actions
+import LevelToggle from '@site/src/components/LevelToggle';
 
-In Lesson 1, we introduced the fundamental communication primitives of ROS 2: nodes, topics, and services. Now, we dive deeper into their practical application, specifically focusing on how Python-based AI agents can leverage `rclpy`—the Python client library for ROS 2—to interact with and control robotic hardware and software components. This lesson will solidify your understanding of these primitives and introduce **Actions**, another critical communication pattern for long-running, interruptible tasks.
+<LevelToggle />
 
-## 2.1 ROS 2 Primitives Revisited: The Python Perspective
+# Lesson 2: Nodes, Topics, Services, and Actions
 
-`rclpy` provides a Pythonic interface to the ROS 2 client library (rcl), enabling developers to write ROS 2 nodes, publishers, subscribers, service servers, and service clients directly in Python. This is particularly advantageous for AI development, where Python's rich ecosystem of machine learning libraries (e.g., TensorFlow, PyTorch, scikit-learn) can be seamlessly integrated with robotic control.
+## 1. The Language of the Graph
 
-### Why Python for ROS 2?
+In Lesson 1, we learned that ROS 2 is a decentralized graph of **Nodes**. But how do these nodes actually converse? Humanoid robots require different "Conversation Patterns" depending on whether they are streaming high-speed IMU data, asking a vision node to find a cup, or telling the legs to "Walk to the office."
 
-*   **Rapid Prototyping**: Python's conciseness and dynamic typing facilitate quick development and iteration cycles, ideal for experimental AI algorithms.
-*   **Rich Ecosystem**: Access to powerful libraries for data analysis, machine learning, and computer vision.
-*   **Readability**: Python's syntax promotes clear and maintainable code, crucial for collaborative robotics projects.
-*   **Bridging AI and Robotics**: `rclpy` acts as the direct bridge, allowing high-level AI decision-making (written in Python) to translate into low-level robot commands (executed via ROS 2).
+There are four primary patterns in the ROS 2 language: **Topics, Services, Actions, and Parameters**. In this lesson, we dive deep into the first three.
 
-## 2.2 Advanced Topic Usage: Custom Message Types and QoS
+## 2. Topics: The Broadcast (Pub/Sub)
 
-While `std_msgs` provides basic message types (like `String`, `Int32`), real-world humanoid robots require custom, more complex data structures. `rclpy` fully supports custom message definitions.
+**Topics** are the most common pattern. They are for **Continuous, Asynchronous Data Streams**.
 
-### Defining Custom Messages
+*   **Analogy**: A Radio Station. One node broadcasts (Publishes) on a frequency, and many nodes can tune in (Subscribe).
+*   **Pattern**: One-to-Many. The broadcaster doesn't know (or care) if anyone is listening.
+*   **Humanoid Use Case**:
+    *   **Joint States**: The robot’s knees and hips constantly publish their current angles (100Hz).
+    *   **Perception**: The camera publishes raw frames (30fps).
+    *   **Commands**: The gait planner publishes "target velocity" to the base controller.
 
-Custom message types are defined in `.msg` files within a ROS 2 package. For example, a `HumanoidJointState.msg` could look like this:
-
-```
-# HumanoidJointState.msg
-std_msgs/Header header
-string[] joint_names
-float64[] joint_positions
-float64[] joint_velocities
-float64[] joint_efforts
-```
-
-After defining, you need to add it to `package.xml` and `CMakeLists.txt` for C++ or `setup.py` for Python to generate the necessary source files.
-
-### Quality of Service (QoS) Profiles
-
-QoS settings are critical for optimizing communication performance and reliability. In `rclpy`, you can specify QoS profiles when creating publishers or subscribers.
+### Defensive Topic Implementation
 
 ```python
-import rclpy
-from rclpy.node import Node
-from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
-from std_msgs.msg import String
+from std_msgs.msg import Float64
 
-class MyPublisher(Node):
+class ElbowController(Node):
     def __init__(self):
-        super().__init__('my_publisher')
-        qos_profile = QoSProfile(
-            reliability=ReliabilityPolicy.BEST_EFFORT, # FASTEST, but not guaranteed delivery
-            history=HistoryPolicy.KEEP_LAST,
-            depth=5, # Keep last 5 messages
-            durability=DurabilityPolicy.VOLATILE # Only available for current subscribers
+        super().__init__('elbow_control')
+        # Topic: /robot/arm/elbow/target
+        self.subscription = self.create_subscription(
+            Float64,
+            '/robot/arm/elbow/target',
+            self.listener_callback,
+            10 # Queue Depth
         )
-        self.publisher_ = self.create_publisher(String, 'my_topic', qos_profile)
-        self.timer = self.create_timer(1.0, self.timer_callback)
-        self.i = 0
 
-    def timer_callback(self):
-        msg = String()
-        msg.data = f'Hello from QoS! Count: {self.i}'
-        self.publisher_.publish(msg)
-        self.get_logger().info(f'Publishing: "{msg.data}"')
-        self.i += 1
-
-def main(args=None):
-    rclpy.init(args=args)
-    node = MyPublisher()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
+    def listener_callback(self, msg: Float64):
+        # DEFENSIVE: Validate range against physical hardware stops
+        # Unitree G1 Elbow limit: 0.0 to 2.5 radians
+        if not (0.0 <= msg.data <= 2.5):
+            self.get_logger().error(f"HARDWARE LIMIT VIOLATION: {msg.data}. Rejecting.")
+            return # Fail Closed (do not move)
+            
+        self.apply_torque(msg.data)
 ```
 
-**QoS Parameters for Humanoids (Weeks 3-5 Heaviness):**
+## 3. Services: The Request (Req/Res)
 
-For humanoid robots, typical QoS choices are:
+**Services** are for **Instant, Synchronous Interactions**.
 
-*   **Sensor Data (e.g., camera feeds, LiDAR scans)**: Often `BEST_EFFORT` reliability and `KEEP_LAST` history with a small `depth`. Dropping old frames is preferable to delaying new ones, especially for real-time perception.
-*   **Critical Commands (e.g., emergency stop, joint commands)**: `RELIABLE` reliability is usually required to ensure delivery, even if it means retransmissions. `TRANSIENT_LOCAL` durability might be used if a late-joining subscriber needs the last known command.
-*   **Configuration Parameters**: `RELIABLE` and `TRANSIENT_LOCAL` to ensure new nodes receive the current configuration immediately.
+*   **Analogy**: A Phone Call. You ask a question, and you wait for an answer.
+*   **Pattern**: One-to-One. The client waits for the server to finish the task and send a response.
+*   **Humanoid Use Case**:
+    *   **Calibration**: "Node A asks Node B to calibrate the IMU."
+    *   **State Change**: "Set the robot to 'Sit' mode."
+    *   **Calculation**: "Calculate the Inverse Kinematics for this hand position."
 
-## 2.3 ROS 2 Actions: Long-Running and Interruptible Tasks
-
-Actions are a communication mechanism designed for long-running goals that may be preempted. They extend the concept of services by providing feedback during execution and allowing clients to cancel goals. An action involves three messages:
-1.  **Goal**: Sent by the client to the action server (e.g., "Move arm to position X").
-2.  **Feedback**: Sent by the action server to the client periodically, indicating progress (e.g., "Arm is at 50% of position X").
-3.  **Result**: Sent by the action server to the client once the goal is completed or aborted (e.g., "Arm reached position X successfully").
-
-Actions are ideal for humanoid tasks like:
-*   **Navigation**: "Go to location Y" (feedback: current position, obstacles encountered).
-*   **Manipulation**: "Pick up object Z" (feedback: gripper closure progress, object detection status).
-*   **Complex Gait Generation**: "Walk for 10 meters" (feedback: distance covered, balance status).
-
-### Practical Example: A Simple Fibonacci Action
-
-Let's illustrate with a `Fibonacci` action.
-
-**Defining the Action**: Create a `.action` file (e.g., `Fibonacci.action` in `my_interfaces/action/`).
-
-```
-# Fibonacci.action
-# Goal
-int32 order
----
-# Result
-int32[] sequence
----
-# Feedback
-int32[] partial_sequence
-```
-
-**Update `package.xml` and `setup.py`** to generate action interfaces.
-
-**Action Server (Python `rclpy`)**:
+### Defensive Service Implementation
 
 ```python
-# ~/ros2_ws/src/my_py_pkg/my_py_pkg/fibonacci_action_server.py
-import rclpy
-from rclpy.action import ActionServer
-from rclpy.node import Node
+from std_srvs.srv import SetBool
 
-from example_interfaces.action import Fibonacci # We'll use the standard example Fibonacci action
+def trigger_calibration(self):
+    client = self.create_client(SetBool, 'calibrate_imu')
+    
+    # DEFENSIVE: Never block indefinitely
+    if not client.wait_for_service(timeout_sec=2.0):
+        self.get_logger().error("Calibration service unavailable. Hardware risk!")
+        return
 
-class FibonacciActionServer(Node):
-
-    def __init__(self):
-        super().__init__('fibonacci_action_server')
-        self._action_server = ActionServer(
-            self,
-            Fibonacci,
-            'fibonacci',
-            self.execute_callback)
-        self.get_logger().info('Fibonacci action server has been started.')
-
-    def execute_callback(self, goal_handle):
-        self.get_logger().info('Executing goal...')
-
-        sequence = [0, 1]
-        for i in range(1, goal_handle.request.order):
-            if goal_handle.is_cancel_requested:
-                goal_handle.canceled()
-                self.get_logger().info('Goal canceled')
-                return Fibonacci.Result()
-
-            sequence.append(sequence[i] + sequence[i-1])
-            feedback_msg = Fibonacci.Feedback()
-            feedback_msg.partial_sequence = sequence
-            goal_handle.publish_feedback(feedback_msg)
-            self.get_logger().info(f'Feedback: {feedback_msg.partial_sequence}')
-
-        goal_handle.succeed()
-        result = Fibonacci.Result()
-        result.sequence = sequence
-        self.get_logger().info('Goal succeeded')
-        return result
-
-def main(args=None):
-    rclpy.init(args=args)
-    fibonacci_action_server = FibonacciActionServer()
-    rclpy.spin(fibonacci_action_server)
-    fibonacci_action_server.destroy_node()
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
+    request = SetBool.Request()
+    request.data = True
+    
+    # DEFENSIVE: Use call_async() to avoid deadlocking the balance thread
+    future = client.call_async(request)
 ```
 
-**Action Client (Python `rclpy`)**:
+## 4. Actions: The Mission (Goal/Feedback/Result)
 
-```python
-# ~/ros2_ws/src/my_py_pkg/my_py_pkg/fibonacci_action_client.py
-import rclpy
-from rclpy.action import ActionClient
-from rclpy.node import Node
+**Actions** are for **Long-running, Preemptible Tasks**.
 
-from example_interfaces.action import Fibonacci
+*   **Analogy**: Ordering Pizza. You place the order (Goal). The restaurant tells you "It's in the oven... it's out for delivery" (Feedback). Finally, you get the pizza (Result).
+*   **Pattern**: One-to-One with continuous feedback. Crucially, you can **Cancel** the action mid-way.
+*   **Humanoid Use Case**:
+    *   **Navigation**: "Walk to the kitchen." (Takes 30 seconds, provides distance-to-goal feedback).
+    *   **Manipulation**: "Grasp the bottle." (Slow, high-stakes movement).
 
-class FibonacciActionClient(Node):
+### Why use Actions instead of Services?
+If you used a Service to "Walk to the kitchen," the robot's brain would be "blocked" for 30 seconds while waiting for the response. It couldn't see obstacles or stop for a human. Actions run in the background.
 
-    def __init__(self):
-        super().__init__('fibonacci_action_client')
-        self._action_client = ActionClient(self, Fibonacci, 'fibonacci')
+## 5. Critical Edge Cases: The "Service Deadlock"
 
-    def send_goal(self, order):
-        self.get_logger().info('Waiting for action server...')
-        self._action_client.wait_for_server()
+A common mistake for beginners is calling a Service inside a Topic callback using a single-threaded executor.
+*   **The Trap**: Callback A starts -> It calls Service B -> It waits. But the same thread is needed to process the Service B response. The system freezes.
+*   **The Fix**: Use **Reentrant Groups** or **MultiThreadedExecutors**, which we will cover in Lesson 4.
 
-        goal_msg = Fibonacci.Goal()
-        goal_msg.order = order
+## 6. Analytical Research: Interface Selection
 
-        self.get_logger().info('Sending goal request...')
-        self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
-        self._send_goal_future.add_done_callback(self.goal_response_callback)
+Choosing the right pattern is a system design decision.
+*   **Topic vs Service**: If data needs to be "Fresh" (like a laser scan), use a Topic. If data needs to be "Confirmed" (like a command to lock a joint), use a Service.
+*   **Research Problem**: Analyzing the bandwidth impact of high-frequency Actions. Should "Balance" be an Action? 
+    *   *Result*: No. Balance is too fast (500Hz). Actions have too much overhead. Balance should be a Topic or a direct hardware interface.
 
-    def goal_response_callback(self, future):
-        goal_handle = future.result()
-        if not goal_handle.accepted:
-            self.get_logger().info('Goal rejected :(')
-            return
+## 7. Multi-Level Summary
 
-        self.get_logger().info('Goal accepted :)')
-        self._get_result_future = goal_handle.get_result_async()
-        self._get_result_future.add_done_callback(self.get_result_callback)
+### [Beginner]
+*   **Topics**: News broadcast (fast, continuous).
+*   **Services**: Phone call (request and wait).
+*   **Actions**: Project manager (do a task, give updates, tell me when done).
 
-    def get_result_callback(self, future):
-        result = future.result().result
-        self.get_logger().info(f'Result: {list(result.sequence)}')
-        rclpy.shutdown()
+### [Pro/Expert]
+Designing a humanoid means minimizing **Graph Jitter**. We use Topics for the control loops and reserved Services for "Safety Interrupts."
 
-    def feedback_callback(self, feedback_msg):
-        self.get_logger().info(f'Received feedback: {list(feedback_msg.feedback.partial_sequence)}')
-
-
-def main(args=None):
-    rclpy.init(args=args)
-    action_client = FibonacciActionClient()
-    action_client.send_goal(10)
-    rclpy.spin(action_client)
-
-
-if __name__ == '__main__':
-    main()
-```
-
-**Update `setup.py`**: Add the new action nodes to the `entry_points` section.
-
-```python
-# ~/ros2_ws/src/my_py_pkg/setup.py (excerpt)
-    entry_points={
-        'console_scripts': [
-            'talker = my_py_pkg.talker_node:main',
-            'listener = my_py_pkg.listener_node:main',
-            'add_server = my_py_pkg.add_two_ints_server:main',
-            'add_client = my_py_pkg.add_two_ints_client:main',
-            'fibonacci_server = my_py_pkg.fibonacci_action_server:main', # New
-            'fibonacci_client = my_py_pkg.fibonacci_action_client:main', # New
-        ],
-    },
-```
-
-**Build and Run**:
-```bash
-cd ~/ros2_ws
-colcon build --packages-select my_py_pkg
-source install/setup.bash
-# Open two terminals, source setup.bash in each
-# Terminal 1:
-ros2 run my_py_pkg fibonacci_server
-# Terminal 2:
-ros2 run my_py_pkg fibonacci_client
-```
-
-## 2.4 Strata-Specific Insights
-
-### Beginner: Concepts and Usage
-
-*   **Analogy**: Think of Actions like ordering a pizza: you place an order (goal), get updates on its status (feedback), and finally receive your pizza (result). You can also call to cancel the order.
-*   **Focus**: Understand when to use Actions versus Topics or Services. Experiment with the Fibonacci example, observing the feedback as the action progresses.
-
-### Researcher: Distributed Inference & Decentralized Training
-
-*   **Distributed Inference**: `rclpy` enables the deployment of AI inference models as ROS 2 nodes. For humanoids, this means specialized nodes for object detection (e.g., YOLO), pose estimation (e.g., OpenPose), or speech recognition can run independently, publishing their results to topics or providing them via services/actions. Consider how `rclpy`'s asynchronous nature (`rclpy.spin_until_future_complete`, `add_done_callback`) facilitates non-blocking AI computations, crucial for real-time robotic response.
-*   **Decentralized Training Problems**: While `rclpy` is primarily for runtime interaction, its distributed nature lays groundwork for decentralized training paradigms. Imagine a fleet of humanoids, each collecting data and performing local model updates. `rclpy` could be used to coordinate these local updates (e.g., sharing model parameters via custom topic messages or aggregated via services) as part of a federated learning strategy. This minimizes data transfer and preserves privacy, particularly relevant for sensitive environmental or interaction data.
-*   **GPU Integration and Fallbacks**: Humanoid AI agents often rely on GPUs for accelerated inference.
-    *   **Direct GPU Access**: Python libraries like PyTorch and TensorFlow can directly utilize CUDA-enabled GPUs. Ensure your `rclpy` nodes are aware of the available hardware.
-    *   **OS/GPU Handling**: Write robust code that checks for GPU availability and provides CPU fallbacks.
-
-    ```python
-    import torch
-    # ... inside a rclpy node ...
-    def __init__(self):
-        # ...
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.get_logger().info(f"Using device: {self.device}")
-        self.model = self.model.to(self.device) # Move model to GPU if available
-        # ...
-    ```
-    This ensures your AI agent can still function, albeit slower, if a GPU is not present or configured correctly.
-
-## 2.5 Error Safety and Critical Scenarios
-
-*   **ROS 2 Actions for Robust Task Execution**: Actions inherently provide feedback and cancelation capabilities, making them suitable for critical, long-running tasks. If a humanoid is performing a complex manipulation and encounters an unexpected obstacle, the action can be preempted, and a new goal issued.
-*   **Service Timeouts and Retries**: When calling services for critical operations, always implement timeouts and retry logic on the client side. A service server might temporarily become unavailable.
-*   **Asynchronous Processing**: `rclpy` heavily leverages Python's `asyncio` capabilities. Improper handling of futures or callbacks can lead to deadlocks or unexpected behavior. Ensure careful management of asynchronous operations, especially when integrating with external blocking libraries.
-
-### Quiz: Test Your Understanding
-
-1.  What is the primary benefit of using `rclpy` for developing ROS 2 nodes in AI applications?
-    a) Only C++ can be used for ROS 2.
-    b) It allows seamless integration with Python's rich AI ecosystem.
-    c) Python nodes are inherently faster than C++ nodes.
-    d) It simplifies hardware interfacing.
-
-2.  When would you prefer using a ROS 2 Action over a Service?
-    a) For simple request-response interactions.
-    b) For continuous data streaming.
-    c) For long-running, interruptible tasks that require feedback.
-    d) To retrieve static robot parameters.
-
-3.  Which QoS setting would you typically use for critical humanoid joint control commands to ensure they are not lost?
-    a) `BEST_EFFORT` reliability
-    b) `RELIABLE` reliability
-    c) `VOLATILE` durability
-    d) `KEEP_LAST` history
-
-4.  Describe a scenario where a GPU fallback to CPU would be beneficial in a `rclpy` node for a humanoid robot. (Open-ended)
+### [Researcher]
+We are studying **Zero-Latency Orchestration**. How can we use the ROS 2 Action server to manage VLA (Vision-Language-Action) tasks where the "Feedback" is a video stream processed by a remote LLM?
 
 ---
-**Word Count**: ~2000 lexemes.
+
+**Next Lesson**: [Lesson 3: Building ROS 2 Packages with Python](./lesson3)

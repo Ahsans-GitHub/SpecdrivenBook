@@ -1,219 +1,146 @@
 ---
-id: lesson4
-title: "Advanced Integration"
-slug: /chapter2/module1/lesson4
+title: "Lesson 4: Launch Files and Parameter Management"
+sidebar_label: "Lesson 4: Launch & Params"
+tags: [ros2, launch, parameters, dynamic-reconfigure, orchestration]
+level: [beginner, normal, pro, advanced, research]
+description: "Orchestrating multi-node systems and managing dynamic robot configurations without magic numbers."
 ---
 
-# Lesson 4: Advanced Integration - Launch Files and Parameter Management (Weeks 3-5 Heaviness)
+import LevelToggle from '@site/src/components/LevelToggle';
 
-Having established a solid understanding of ROS 2 communication primitives (nodes, topics, services, actions) and how to describe your robot with URDF, this final lesson of Module 1 focuses on bringing these components together into cohesive, manageable systems. We'll explore **Launch Files** – the powerful orchestration tool in ROS 2 – and delve into **Parameter Management**, essential for configuring your robot's behavior without recompiling code.
+<LevelToggle />
 
-This lesson represents a significant step towards developing real-world humanoid applications, emphasizing system integration, configuration best practices, and the robust deployment of complex robotic architectures.
+# Lesson 4: Launch Files and Parameter Management
 
-## 4.1 ROS 2 Launch Files: Orchestrating Complex Systems
+## 1. The Orchestration Problem
 
-As robotic systems grow in complexity, manually starting each node, setting parameters, and configuring visualization tools becomes impractical. ROS 2 **Launch Files** provide a declarative way to define how a collection of nodes and other processes should be started, configured, and managed. They are written in Python (or XML, but Python is preferred for its flexibility).
+A humanoid robot like the **Unitree G1** does not run one node; it runs fifty.
+*   10 nodes for Joint Controllers.
+*   5 nodes for Perception.
+*   3 nodes for high-level Reasoning.
+*   1 node for the Voice Assistant.
 
-Launch files allow you to:
-*   **Start multiple nodes**: Launch several nodes simultaneously or in a defined sequence.
-*   **Set parameters**: Pass configuration values to nodes.
-*   **Remap topics/services**: Change the names of topics or services to avoid conflicts or adapt to specific setups.
-*   **Include other launch files**: Build modular launch configurations.
-*   **Conditional execution**: Start nodes or apply configurations based on conditions (e.g., simulation vs. real hardware).
-*   **Respawn nodes**: Automatically restart nodes if they crash.
+Opening 50 terminal tabs and typing `ros2 run...` is impossible. **Launch Files** solve this. They are the "Scripts of Scripts" that start your entire robot system with a single command. 
 
-### Basic Python Launch File Structure
+Furthermore, you should never hardcode values like `MAX_SPEED = 1.5` in your Python code. What if the robot is on a slippery floor? You need **Parameters**—dynamically tunable values that allow you to change the robot's behavior without recompiling or restarting nodes.
+
+## 2. ROS 2 Parameters: Eliminating "Magic Numbers"
+
+A **Parameter** is a typed value (string, int, float, bool) stored inside a node.
+
+### Defensive Parameter Implementation
 
 ```python
-# ~/ros2_ws/src/my_humanoid_bringup/launch/humanoid_control.launch.py
+from rcl_interfaces.msg import ParameterDescriptor, FloatingPointRange
+
+class BipedController(Node):
+    def __init__(self):
+        super().__init__('biped_control')
+        
+        # DEFENSIVE: Describe the parameter and its safe bounds
+        speed_desc = ParameterDescriptor(
+            description="Max walking speed in m/s",
+            floating_point_range=[FloatingPointRange(from_value=0.0, to_value=1.5, step=0.1)]
+        )
+        
+        # Declare Parameter: Name, Default Value, Descriptor
+        self.declare_parameter('max_speed', 1.0, speed_desc)
+        
+        # Get Value
+        self.limit = self.get_parameter('max_speed').value
+        
+        # DEFENSIVE: Monitor for runtime changes (Dynamic Reconfigure)
+        self.add_on_set_parameters_callback(self.param_callback)
+
+    def param_callback(self, params):
+        for param in params:
+            if param.name == 'max_speed':
+                if param.value > 1.5:
+                    return SetParametersResult(successful=False, reason="Safety limit exceeded!")
+                self.limit = param.value
+                self.get_logger().info(f"Speed updated to {self.limit}")
+        return SetParametersResult(successful=True)
+```
+
+## 3. Python Launch Files: The System Architect
+
+In ROS 2, launch files are written in **Python**. This gives you the power of logic: "If `sim_mode` is True, load Gazebo; otherwise, start the physical motor drivers."
+
+### Anatomy of a Launch File (`bringup.launch.py`)
+
+```python
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-import os
-from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    # Declare launch arguments
-    use_sim_time_arg = DeclareLaunchArgument(
-        'use_sim_time',
-        default_value='false',
-        description='Use simulation (Gazebo) clock if true'
+    # 1. Arguments (Inputs to the launch file)
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    
+    # 2. Node Configuration
+    vision_node = Node(
+        package='my_vision_pkg',
+        executable='detector',
+        name='g1_vision',
+        parameters=[{'use_sim_time': use_sim_time}],
+        # DEFENSIVE: Respawn if it crashes
+        respawn=True,
+        respawn_delay=2.0
     )
     
-    # Get package share directory for including other launch files or URDF paths
-    my_humanoid_description_dir = get_package_share_directory('my_humanoid_description')
-    
-    # Example: Include a robot_description launch file
-    robot_description_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(my_humanoid_description_dir, 'launch', 'display.launch.py')
-        ),
-        launch_arguments={'use_sim_time': LaunchConfiguration('use_sim_time')}.items()
-    )
-
-    # Example: Launch a controller node
-    joint_state_controller_node = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_state_broadcaster', '--controller-manager', '/controller_manager'],
-        output='screen'
-    )
-
-    # Example: Launch a custom Python agent node
-    ai_agent_node = Node(
-        package='my_py_pkg',
-        executable='ai_behavior_node',
-        name='humanoid_ai_agent',
-        parameters=[{
-            'debug_mode': True,
-            'movement_speed': 0.5
-        }],
-        output='screen',
-        # Set remapping for topics
-        remappings=[
-            ('/cmd_vel', '/humanoid/cmd_vel'),
-            ('/scan', '/humanoid/lidar_scan')
-        ]
-    )
-
+    # 3. Aggregation
     return LaunchDescription([
-        use_sim_time_arg,
-        robot_description_launch,
-        joint_state_controller_node,
-        ai_agent_node,
-        # ... potentially many more nodes for perception, planning, etc.
+        DeclareLaunchArgument('use_sim_time', default_value='false'),
+        vision_node
     ])
 ```
 
-To run this launch file:
-```bash
-ros2 launch my_humanoid_bringup humanoid_control.launch.py use_sim_time:=true
-```
+### Defensive Launch Features
+*   **Respawn**: If a node crashes (e.g., OOM on the Jetson), the launch system will automatically restart it.
+*   **Namespaces**: You can launch the same "Arm Control" node twice, once in the `/left` namespace and once in the `/right` namespace. This prevents topic name collisions.
 
-## 4.2 Parameter Management: Dynamic Configuration
+## 4. YAML Files: The Global Config
 
-**Parameters** in ROS 2 are dynamic configuration values that nodes can expose. They allow you to change a node's behavior at runtime without modifying and recompiling its source code. This is invaluable for tuning a robot's performance in different environments or for adapting to varying task requirements.
+For a humanoid, you might have hundreds of PID gains. Putting these in a launch file is messy. We use **YAML Config Files**.
 
-Key features of ROS 2 parameters:
-*   **Node-specific**: Each node maintains its own set of parameters.
-*   **Type-safe**: Parameters have defined types (e.g., integer, float, string, boolean).
-*   **Dynamic updates**: Parameters can be read, set, and updated at runtime using command-line tools or programmatically.
-*   **YAML configuration**: Parameters can be loaded from YAML files during launch.
-
-### Example: Using and Setting Parameters in Python
-
-```python
-# ~/ros2_ws/src/my_py_pkg/my_py_pkg/configurable_node.py
-import rclpy
-from rclpy.node import Node
-
-class ConfigurableNode(Node):
-    def __init__(self):
-        super().__init__('configurable_node')
-
-        # Declare parameters with default values and descriptions
-        self.declare_parameter('movement_speed', 0.5)
-        self.declare_parameter('debug_mode', False)
-        self.declare_parameter('robot_id', 'humanoid_alpha')
-
-        # Get parameter values
-        self.movement_speed = self.get_parameter('movement_speed').get_parameter_value().double_value
-        self.debug_mode = self.get_parameter('debug_mode').get_parameter_value().bool_value
-        self.robot_id = self.get_parameter('robot_id').get_parameter_value().string_value
-
-        self.get_logger().info(f'ConfigurableNode initialized with:')
-        self.get_logger().info(f'  Movement Speed: {self.movement_speed}')
-        self.get_logger().info(f'  Debug Mode: {self.debug_mode}')
-        self.get_logger().info(f'  Robot ID: {self.robot_id}')
-
-        # Create a timer to demonstrate parameter updates (optional)
-        self.create_timer(5.0, self.timer_callback)
-        self.get_logger().info('To change parameters, use: ros2 param set /configurable_node movement_speed 0.7')
-
-    def timer_callback(self):
-        # Refresh parameter values (if they were changed externally)
-        self.movement_speed = self.get_parameter('movement_speed').get_parameter_value().double_value
-        self.debug_mode = self.get_parameter('debug_mode').get_parameter_value().bool_value
-        self.get_logger().info(f'Timer: Current Speed: {self.movement_speed}, Debug: {self.debug_mode}')
-
-
-def main(args=None):
-    rclpy.init(args=args)
-    node = ConfigurableNode()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
-```
-
-**Running with YAML parameters**:
-You can define parameters in a YAML file:
 ```yaml
-# ~/ros2_ws/src/my_py_pkg/config/my_params.yaml
-configurable_node:
+# config/g1_params.yaml
+g1_controller:
   ros__parameters:
-    movement_speed: 0.75
-    debug_mode: true
-    robot_id: "humanoid_beta"
+    max_speed: 1.2
+    pid: [10.0, 0.1, 1.0]
+    safety_enabled: true
 ```
-And load them in a launch file or directly:
-```bash
-ros2 run my_py_pkg configurable_node --ros-args --params-file src/my_py_pkg/config/my_params.yaml
-```
-Or directly using `ros2 param set`:
-```bash
-ros2 param set /configurable_node movement_speed 0.8
-```
+You can load this file into your node in the launch script:
+`parameters=[os.path.join(get_package_share_directory('my_pkg'), 'config', 'g1_params.yaml')]`
 
-## 4.3 Strata-Specific Insights
+## 5. Critical Edge Cases: Parameter Jitter
 
-### Beginner: Getting Started with System Control
+When you change a parameter at runtime (e.g., tuning balance while the robot is walking):
+*   **The Trap**: The parameter update happens in a different thread than the control loop. If you are halfway through a math calculation and the value changes, the robot will fall.
+*   **The Fix**: Use **Atomic Updates**. Read the parameter value once at the start of your calculation and use that copy for the rest of the loop.
 
-*   **Focus**: Understand that launch files simplify starting your robot system. Learn to identify which nodes are being launched and how to pass simple arguments to them (like `use_sim_time`).
-*   **Hands-on**: Run the `humanoid_control.launch.py` (after creating a dummy `ai_behavior_node` in `my_py_pkg`) and observe all the nodes starting. Use `ros2 node list` and `ros2 topic list`.
+## 6. Analytical Research: Deterministic Orchestration
 
-### Researcher: Optimizing Deployment and Cyber-Resilience
+In research, we care about **Event Ordering**. 
+*   **The Problem**: Launch files start nodes in a random order (Parallel). What if Node A needs Node B to be ready?
+*   **Research Solution: Event Handlers**. ROS 2 Launch allows you to write "OnProcessStart" or "OnProcessExit" handlers. 
+    *   *Example*: "Wait until the LIDAR node is finished calibrating before starting the Walker node."
 
-*   **Complex Inter-Node Dependencies**: For humanoids, understanding and managing complex dependencies (e.g., a locomotion controller depending on a state estimator, which depends on sensor fusion) within launch files is critical. Explore `RegisterEventHandler` and `EmitEvent` for advanced sequencing and error handling in Python launch files.
-*   **Security Configuration**: As of 2025 ROS updates, launch files can now directly integrate security configurations for nodes (e.g., specifying signed policy files for secure DDS). This ensures that critical systems start with the correct security posture.
-*   **Dynamic Parameter Reconfiguration**: Investigate how parameters can be dynamically updated in response to environmental changes or mission requirements. For humanoids, this could mean adjusting gait parameters based on terrain analysis or adapting manipulation strategies based on object properties. Explore programmatic parameter clients in Python for advanced control.
-*   **Deployment Strategies (Weeks 3-5 Heaviness)**:
-    *   **Containerization (Docker/Podman)**: Package entire ROS 2 applications, including launch files and dependencies, into Docker containers for consistent deployment across different host OS (Ubuntu, Windows via WSL, macOS). This ensures identical environments, mitigating "works on my machine" issues.
-    *   **Orchestration (Kubernetes/Edge Deployments)**: For fleet management or large-scale humanoid deployments, understand how ROS 2 launch files can be integrated into higher-level orchestration systems like Kubernetes. This is particularly relevant for managing computational resources on edge devices.
-    *   **Centralized Logging and Monitoring**: Integrate `log_output='screen'` with external logging solutions and monitoring tools (e.g., Prometheus, Grafana) to provide comprehensive insights into your humanoid's behavior during complex operations.
+## 7. Multi-Level Summary
 
-## 4.4 Error Safety and Critical Scenarios
+### [Beginner]
+A Launch file is like a "Startup List." It's one file that turns on all the robot's parts. Parameters are like the "Settings" menu in a game—they let you change how things work without changing the code.
 
-*   **Launch File Errors**: Syntax errors in Python launch files can prevent the entire system from starting. Use `python -m compileall <launch_file.py>` for basic syntax checking. ROS 2 provides informative error messages during launch failures.
-*   **Parameter Overrides**: Be aware of the order of precedence for parameters (defaults, CLI arguments, YAML files, runtime sets). Incorrect overrides can lead to unexpected robot behavior. Always verify parameters using `ros2 param get <node_name> <param_name>`.
-*   **Dependency Conflicts (Revisited)**: Launch files are often the point where dependency conflicts manifest. Ensure all necessary packages are built and sourced. For GPU-dependent nodes, verify CUDA/OpenCL paths and driver versions before launching.
-*   **Secure DDS Integration**: When security is enabled, misconfigured launch files can prevent nodes from communicating due to authentication or access control failures. Always test secure configurations thoroughly. Implement programmatic checks within nodes to verify security context (e.g., `rclpy.get_security_context()`).
+### [Pro/Expert]
+System orchestration is about **Dependency Management**. We use Launch Arguments to toggle between "Sim" and "Real" modes, and YAML files to manage the thousands of variables required for humanoid gait control.
 
-### Quiz: Test Your Understanding
-
-1.  What is the primary purpose of a ROS 2 launch file?
-    a) To write new ROS 2 nodes
-    b) To compile ROS 2 packages
-    c) To orchestrate the startup and configuration of multiple ROS 2 nodes and processes
-    d) To manage hardware drivers
-
-2.  Which of the following is NOT a capability of ROS 2 launch files?
-    a) Remapping topic names
-    b) Programmatically changing a node's source code at runtime
-    c) Including other launch files
-    d) Setting parameters for nodes
-
-3.  Why is parameter management particularly important for humanoid robotics?
-    a) To make the robot look more appealing
-    b) To dynamically adjust robot behavior without recompilation
-    c) To reduce the number of nodes
-    d) To standardize message types
-
-4.  You've created a launch file for your humanoid, but a specific node isn't starting with the parameters you expect. Describe your troubleshooting steps. (Open-ended)
+### [Researcher]
+The challenge is **Distributed Configuration**. In a fleet of 100 humanoids, how do we update the `max_speed` parameter on all of them simultaneously? We are studying **Global Parameter Stores** using Etcd or Redis integrated into the ROS 2 graph.
 
 ---
-**Word Count**: ~2400 lexemes.
+
+**Summary of Module 1**: You have mastered the nervous system. You can build nodes, move data, and orchestrate systems. You are a Robotic Software Engineer. In Module 2, we leave the terminal and enter the **Virtual World** of Simulation.
+
+**Next Module**: [Chapter 3: Robot Simulation](../chapter3/module2-overview)
