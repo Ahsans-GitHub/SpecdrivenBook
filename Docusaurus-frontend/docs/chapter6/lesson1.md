@@ -78,7 +78,7 @@ LLMs are non-deterministic. They might invent a command like `fly_to_moon()`.
 ## 4. Analytical Research: Latency vs. Intelligence
 
 *   **Cloud (GPT-4o)**: High intelligence, high latency (1-3 seconds). Good for complex task planning ("Organize the room").
-*   **Edge (Llama-3-8B on Jetson)**: Lower intelligence, low latency (<200ms). Good for reactive conversation ("Stop now!") and privacy.
+*   **Edge (Llama-3-8B on Jetson)**: Lower intelligence, low latency (`<200ms`). Good for reactive conversation ("Stop now!") and privacy.
 *   **Research**: Implementing a **Hybrid Architecture** where the Edge model handles safety and basic talk, while the Cloud model handles long-term strategy.
 
 ## 5. Defensive Programming Checklist
