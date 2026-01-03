@@ -1,80 +1,70 @@
 ---
-title: "Lesson 4: Capstone Project - The Autonomous Humanoid"
-sidebar_label: "Lesson 4: Capstone Project"
-tags: [capstone, integration, autonomous-humanoid, system-design]
-level: [beginner, normal, pro, advanced, research]
-description: "Full system integration: Building a complete autonomous behavior loop for the Unitree G1."
+id: lesson4
+title: Capstone Project The Autonomous Humanoid
+sidebar_label: Natural human-robot interaction design
 ---
 
-import LevelToggle from '@site/src/components/LevelToggle';
+# Capstone Project: The Autonomous Humanoid. A final project where a simulated robot receives a voice command, plans a path, navigates obstacles, identifies an object using computer vision, and manipulates it.
 
-<LevelToggle />
+## Heading Breakdown
+**Capstone Project: The Autonomous Humanoid** is the summation of the entire curriculum. **Autonomous** means the robot makes its own decisions. **Humanoid** means it does so in a human-shaped body. **A final project...** details the scope: **Voice command** (Module 4, Whisper), **Plans a path** (Module 3, Nav2), **Navigates obstacles** (Module 2, Gazebo/Physics), **Identifies an object** (Module 3, Isaac Perception), and **Manipulates it** (Module 5, VLA). The importance is **integration**; demonstrating that you can build a system greater than the sum of its parts. Real usage is the **Unitree G1** standing in a kitchen, hearing "Pour me some water," and executing the task autonomously. This is key for **upgradable high-DoF humanoids**; it proves the architecture is robust enough for real-world service.
 
-# Lesson 4: Capstone Project - The Autonomous Humanoid
+*(Note: Sidebar refers to HRI Design, but per mapping, we cover the Capstone here).*
 
-## 1. Project Goal
+## Training Focus: System Integration
+We focus on **glue**.
+*   **State Machines**: Using `Smach` or `BehaviorTree.CPP` to manage the overall flow.
+*   **Error Handling**: What happens if the cup slips?
 
-The objective of this capstone is to create a fully integrated **Autonomous Assistant** loop using the **Unitree G1**. 
+## Detailed Content
+### The Mission
+1.  **Start**: Robot is at charging dock.
+2.  **Trigger**: User says "Find the blue cube."
+3.  **Search**: Robot explores the house (Nav2).
+4.  **Detect**: Camera sees blue pixels (YOLO).
+5.  **Approach**: Robot walks to table.
+6.  **Grasp**: Arm reaches out (MoveIt).
+7.  **Return**: Robot brings cube to user.
 
-**The Task**: The robot must wait for a voice command, identify a specific object in a messy environment, walk to it, pick it up, and return it to the user.
+### Evaluation Criteria
+*   **Robustness**: Does it work 10/10 times?
+*   **Speed**: Is it faster than a snail?
+*   **Safety**: Did it hit the wall?
 
-## 2. The Integrated Architecture
+### Industry Vocab
+*   **System of Systems**: A complex entity built of smaller complex entities.
+*   **Full Stack Robotics**: From soldering iron to neural network.
+*   **Deployment**: Getting the code off your laptop and onto the robot.
 
-Your system will consist of four main layers:
-1.  **Interaction Layer**: Whisper ROS node + LLM Task Planner.
-2.  **Perception Layer**: Isaac ROS Object Detection + 3D Mapping (NVBlox).
-3.  **Planning Layer**: Nav2 (Navigation) + MoveIt 2 (Manipulation).
-4.  **Control Layer**: 500Hz Balance Controller (RL or MPC).
-
-## 3. Implementation Workflow
-
-### Step 1: The Digital Twin Setup
-*   Load the G1 into **Isaac Sim**.
-*   Verify that your ROS 2 nodes can see the simulated camera feeds and IMU.
-
-### Step 2: The Cognitive Core
-*   Implement a Python node that takes text input and generates a sequence of ROS 2 Action goals.
-*   *Defensive Check*: Test your planner with "malicious" prompts to ensure it never outputs an `unsafe_walk` command.
-
-### Step 3: Perception Tuning
-*   Train a vision model to detect your capstone objects (e.g., a specific tool or container).
-*   Ensure your 3D map updates fast enough to avoid people walking in the robot's path.
-
-### Step 4: Full Loop Test
-*   Run the "Sim-to-Real" validation.
-*   Deploy to the physical Unitree G1 (under supervision).
-
-## 4. Defensive "State Machine"
-
-Don't let the robot be "confused." Use a **Behavior Tree** to manage states.
-*   **State: IDLE** (Waiting for command)
-*   **State: PLANNING** (LLM is thinking)
-*   **State: ACTING** (Walking/Grasping)
-*   **State: ERROR** (Something went wrong - **Fail Closed**)
-
+### Code Example: The Main Loop
 ```python
-# Behavioral Safety
-if robot.battery_level < 15%:
-    bt.interrupt_current_task()
-    bt.switch_to_state("GO_TO_CHARGER")
+# Defensive Main Loop
+def main():
+    rclpy.init()
+    robot = RobotInterface()
+    
+    try:
+        # 1. Wait for Voice
+        command = robot.listen_for_command()
+        
+        # 2. Plan
+        plan = robot.ask_llm(command)
+        
+        # 3. Execute with Watchdog
+        for action in plan:
+            status = robot.execute(action, timeout=10.0)
+            if status == 'failed':
+                robot.speak("I'm sorry, I failed to " + action.name)
+                robot.go_home()
+                return
+
+        robot.speak("Task complete.")
+        
+    except KeyboardInterrupt:
+        robot.emergency_stop()
+    finally:
+        robot.shutdown()
 ```
 
-## 5. Success Criteria for Your Capstone
-
-1.  **Reliability**: Can the robot perform the task 5 times in a row without falling?
-2.  **Safety**: Does the robot stop if a human enters its "Personal Space" (1-meter radius)?
-3.  **Efficiency**: Does the LLM generate a logical, direct plan?
-4.  **Robustness**: Does the robot recover if it trips or if the object is moved?
-
-## 6. Analytical Research: Post-Capstone ASI Integration
-
-Once your robot is autonomous, the next step is **Artificial Super Intelligence (ASI)** integration.
-*   **Research**: How can a robot "learn from its own mistakes" in the real world? Implementing an online learning loop where the robot updates its internal model every time a grasp fails.
-
-## 7. Final Reflections
-
-You have reached the end of the technical curriculum. You have the tools to build, simulate, and deploy embodied intelligence. Remember: **The physical world is the ultimate judge of your code.** Build with precision, program with paranoia, and innovate with purpose.
-
----
-
-**Next Steps**: Proceed to **Chapter 7** for final assessments and to claim your mastery certification.
+## Real-World Use Case: The Demo
+This project is your portfolio. It demonstrates to employers that you understand the entire pipeline. You aren't just a "vision guy" or a "control guy"; you are a **Roboticist**.

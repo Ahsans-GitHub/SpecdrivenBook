@@ -1,89 +1,63 @@
 ---
-title: "Lesson 3: Physics Simulation and Sensor Simulation"
-sidebar_label: "Lesson 3: Physics & Sensors"
-tags: [physics, sensors, gazebo, lidar, friction, noise]
-level: [beginner, normal, pro, advanced, research]
-description: "Simulating the messy reality of the physical world: friction, gravity, sensor noise, and hardware emulation."
+id: lesson3
+title: High-fidelity rendering and human-robot interaction in Unity
+sidebar_label: Physics simulation and sensor simulation
 ---
 
-import LevelToggle from '@site/src/components/LevelToggle';
+# High-fidelity rendering and human-robot interaction in Unity.
 
-<LevelToggle />
+## Heading Breakdown
+**High-fidelity rendering and human-robot interaction in Unity** bridges the gap between engineering simulation and user experience. **High-fidelity rendering** means producing images that look real—accurate lighting, shadows, textures, and reflections. **Human-Robot Interaction (HRI)** is the study of how people communicate with robots. **Unity** is a game engine used here not for games, but for its superior graphics pipeline compared to Gazebo. The importance is **visualization**; you cannot test how a human reacts to a robot's gesture if the robot looks like a collection of gray cylinders. Real usage involves streaming ROS 2 data into Unity to visualize a **Unitree G1** greeting a person in a VR environment. An example is using the **ROS-TCP-Connector** to mirror the robot's joint states in Unity in real-time. This is key for **upgradable high-DoF humanoids** designed for social interaction, allowing us to test "approach behaviors" (e.g., how close is too close?) without putting a human in danger.
 
-# Lesson 3: Physics Simulation and Sensor Simulation
+*(Note: Sidebar refers to Physics/Sensors, but per mapping, we cover Unity/HRI here).*
 
-## 1. Beyond the Visuals: Making it Matter
+## Training Focus: Visual Realism
+We focus on **perception**. Not the robot's perception, but the *human's* perception of the robot.
+*   **Uncanny Valley**: Avoiding the creepy look by smoothing motions and improving textures.
+*   **VR Integration**: Putting on a headset to stand "next to" the robot.
 
-A robot in a simulator is just a collection of pretty 3D shapes until we apply the laws of **Physics**. In this lesson, we move from the static "Skeleton" (URDF) to the dynamic "Actor." We will explore how to model the complex interaction between a 50kg **Unitree G1** and the floor, and how to emulate the "Eyes" of the robot (Sensors) in a way that doesn't lie to our AI.
+## Detailed Content
+### The Unity-ROS Bridge
+How we connect the two worlds.
+*   **ROS-TCP-Endpoint**: A ROS node that listens for TCP connections.
+*   **Unity Robotics Hub**: A set of C# scripts for parsing ROS messages.
 
-## 2. The Physics of Interaction
+### HRI Scenarios
+*   **Proxemics**: Testing social distances.
+*   **Gaze**: Making the robot "look" at the user (Head tracking).
 
-When a humanoid foot hits the ground, the physics engine (ODE or DART) must solve thousands of equations in milliseconds.
+### Industry Vocab
+*   **Prefab**: A reusable asset in Unity (the robot model).
+*   **Raycast**: Checking line-of-sight.
+*   **Shader**: Code that calculates the color of pixels (for realistic skin/metal).
 
-### Friction: The Walker's Best Friend
-Friction is what allows the G1 to push off the floor. 
-*   **Static Friction ($\mu$)**: The force needed to start moving.
-*   **Dynamic Friction ($\mu_2$)**: The force needed to keep moving.
-*   **The Sim-to-Real Trap**: Gazebo defaults to $\mu=1.0$ (perfect traction). If you train your walker on this, it will fall immediately on a real tiled floor ($\mu=0.5$).
-*   **Defensive Practice**: Always randomize friction in your simulation. Train your robot to walk on "Ice" and "Sandpaper" simultaneously.
+### Code Example: Unity C# Script
+```csharp
+// Defensive ROS Subscriber in Unity
+using UnityEngine;
+using Unity.Robotics.ROSTCPConnector;
+using RosMessageTypes.Sensor;
 
-### Restitution (Bounciness)
-When the G1 lands from a jump, does the foot thud or bounce? This is controlled by the `<restitution_coefficient>`. For stable humanoid walking, we want low restitution (0.0 to 0.1) to absorb energy.
+public class CameraVisualizer : MonoBehaviour
+{
+    public string topicName = "camera/image_raw";
 
-## 3. Sensor Simulation: Emulating Hardware
+    void Start()
+    {
+        // Subscribe to ROS topic with safety check
+        ROSConnection.GetOrCreateInstance().Subscribe<ImageMsg>(topicName, UpdateTexture);
+    }
 
-We don't just "see" the virtual world; we simulate the *process* of seeing. We use **Gazebo Plugins** to emulate real hardware.
-
-### LIDAR Simulation
-Gazebo uses **Ray Casting**. It shoots virtual lasers from the robot's head and calculates the intersection with the 3D geometry of the room.
-*   **Performance Note**: GPU LIDAR is 10x faster than CPU LIDAR because it parallelizes the ray-casting on your NVIDIA RTX card.
-
-### Depth Camera (RealSense) Simulation
-Emulates the dual-camera stereo matching of the Intel RealSense D435i.
-*   **The Trap**: Simulated cameras are "Perfect." They don't have motion blur, lens flare, or dark noise.
-*   **The Defensive Fix: Noise Injection**. A simulated sensor that gives "Zero Error" is a dangerous sensor.
-
-```xml
-<!-- Defensive Sensor Configuration -->
-<sensor name="intel_realsense" type="rgbd_camera">
-  <update_rate>30</update_rate>
-  <camera>
-    <horizontal_fov>1.51</horizontal_fov>
-    <image>
-      <width>640</width>
-      <height>480</height>
-    </image>
-    <!-- DEFENSIVE: Add noise to prevent AI over-fitting -->
-    <noise>
-      <type>gaussian</type>
-      <mean>0.0</mean>
-      <stddev>0.05</stddev> <!-- 5% noise -->
-    </noise>
-  </camera>
-</sensor>
+    void UpdateTexture(ImageMsg msg)
+    {
+        if (msg.data.Length == 0) {
+            Debug.LogWarning("Received empty image frame!");
+            return;
+        }
+        // ... decoding logic ...
+    }
+}
 ```
 
-## 4. Practical Scenario: The "Exploding Robot" (Self-Collision)
-
-One of the most frustrating experiences in simulation is when your robot "Explodes" at startup.
-*   **The Cause**: Two collision boxes (e.g., upper leg and pelvis) are overlapping. The physics engine detects a collision and applies a massive repulsive force.
-*   **The Defensive Fix**: Use `<self_collide>false</self_collide>` for adjacent links in your URDF. Only enable self-collision for parts that can actually hit each other (like left hand hitting right leg).
-
-## 5. Analytical Research: Contact Solvers
-
-For research-tier learners, the choice of **Solver** impacts the stability of the 500Hz balance loop.
-*   **PGS (Projected Gauss-Seidel)**: Fast but "Spongy." It can make the robot's joints feel like they are made of rubber.
-*   **DART**: Handles "Closed-Loop Kinematics" better. If the robot's arms are holding a heavy object, DART is 30% more accurate than ODE.
-*   **Research Problem**: Comparing the "Impact Dynamics" of bipedal walking in Gazebo vs. the real-world Force/Torque sensor data from a Unitree G1.
-
-## 6. Defensive Simulation Checklist
-*   [ ] Did you simplify your collision geometry to primitive shapes (Box/Sphere)?
-*   [ ] Is there Gaussian noise on your LIDAR and Depth Camera?
-*   [ ] Did you check if the `imu_sensor` is properly aligned with the robot's `base_link`?
-*   [ ] Have you verified the friction coefficients match the real-world testing environment?
-
----
-
-**Summary**: Physics and Sensors are the inputs to your Physical AI brain. If you train on "Miracle Sensors" and "Sandpaper Floors," your code will fail the moment it touches a real robot. Next, we move from the terminal to the high-fidelity visualization of **Unity**.
-
-**Next Lesson**: [Lesson 4: Introduction to Unity for Robot Visualization](./lesson4)
+## Real-World Use Case: Safety bubbles
+We visualize the robot's "safety bubble" in Unity. While the real robot moves, we project a red sphere around it in Unity representing the danger zone. This helps safety engineers understand exactly where the robot thinks it is safe to be.

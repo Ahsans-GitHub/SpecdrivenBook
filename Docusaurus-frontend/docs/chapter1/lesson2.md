@@ -1,6 +1,6 @@
 ---
-title: "Lesson 2: From Digital AI to Physical Laws"
-sidebar_label: "Lesson 2: Digital vs Physical"
+title: "From Digital AI to Physical Laws"
+sidebar_label: "Digital vs Physical"
 tags: [physics, classical-mechanics, safety, constraints]
 level: [beginner, normal, pro, advanced, research]
 description: "Analyzing the transition from reversible digital states to irreversible physical actions under the laws of motion."
@@ -10,7 +10,7 @@ import LevelToggle from '@site/src/components/LevelToggle';
 
 <LevelToggle />
 
-# Lesson 2: From Digital AI to Physical Laws
+# From Digital AI to Physical Laws
 
 ## 1. The Tyranny of the Real: Why Matter Matters
 

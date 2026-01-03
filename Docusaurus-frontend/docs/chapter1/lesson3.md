@@ -1,6 +1,6 @@
 ---
-title: "Lesson 3: The Humanoid Robotics Landscape"
-sidebar_label: "Lesson 3: Humanoids"
+title: "The Humanoid Robotics Landscape"
+sidebar_label: "Humanoids"
 tags: [humanoids, unitree, morphology, robotics-landscape]
 level: [beginner, normal, pro, advanced, research]
 description: "A comprehensive survey of the anthropomorphic robot design and its role in a human-centric world."
@@ -10,7 +10,7 @@ import LevelToggle from '@site/src/components/LevelToggle';
 
 <LevelToggle />
 
-# Lesson 3: The Humanoid Robotics Landscape
+# The Humanoid Robotics Landscape
 
 ## 1. Why the Human Form? The Anthropocentric Case
 

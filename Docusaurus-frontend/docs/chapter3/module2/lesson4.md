@@ -1,92 +1,53 @@
 ---
-title: "Lesson 4: Introduction to Unity for Robot Visualization"
-sidebar_label: "Lesson 4: Unity Viz"
-tags: [unity, visualization, hri, digital-twin, vr]
-level: [beginner, normal, pro, advanced, research]
-description: "Using the Unity Game Engine as a high-fidelity frontend for ROS 2 humanoid data and Human-Robot Interaction."
+id: lesson4
+title: Simulating sensors LiDAR Depth Cameras and IMUs
+sidebar_label: Introduction to Unity for robot visualization
 ---
 
-import LevelToggle from '@site/src/components/LevelToggle';
+# Simulating sensors: LiDAR, Depth Cameras, and IMUs.
 
-<LevelToggle />
+## Heading Breakdown
+**Simulating sensors: LiDAR, Depth Cameras, and IMUs** focuses on generating the synthetic inputs that drive the robot's brain. **LiDAR** (Light Detection and Ranging) provides 360-degree distance maps. **Depth Cameras** (like RealSense) provide dense 3D point clouds. **IMUs** (Inertial Measurement Units) provide acceleration and rotation rates. Simulating these means mathematically calculating what the sensor *would* see if it were real. The importance is **testing perception algorithms**; you can't test a SLAM algorithm without data. Real usage involves configuring a **Gazebo plugin** to emit a `/scan` topic that mimics the noise characteristics of a Velodyne VLP-16. An example is adding Gaussian noise to the IMU data to test if the **Unitree G1**'s balance controller is robust to drift. This is key for **upgradable high-DoF humanoids** because we can swap virtual sensors instantly to see if a better camera improves navigation.
 
-# Lesson 4: Introduction to Unity for Robot Visualization
+*(Note: Sidebar refers to Unity Intro, but per mapping, we cover Sensors here).*
 
-## 1. Why a Game Engine for Robots?
+## Training Focus: Sensor Models
+We focus on **noise**. Perfect sensors don't exist.
+*   **Gaussian Noise**: Adding random jitter to values.
+*   **Update Rate**: Simulating the fact that cameras are slow (30Hz) and IMUs are fast (1000Hz).
 
-Gazebo is excellent for physics, but its visual quality is "functional" at best. To train modern computer vision models (Synthetic Data) or to test **Human-Robot Interaction (HRI)**, we need photorealism. This is where **Unity** comes in.
+## Detailed Content
+### Gazebo Sensor Plugins
+*   **Ray Sensor**: For LiDAR. GPU-accelerated versions are essential for performance.
+*   **Camera Sensor**: Renders the scene to a texture and publishes the pixels.
+*   **IMU Sensor**: Reads the physics engine's acceleration of the link.
 
-Unity provides:
-*   **Ray-Traced Visuals**: Simulating lens flare, reflections, and dynamic lighting.
-*   **HRI Simulation**: Simulating human avatars that walk and interact with the robot.
-*   **VR/AR Support**: Controlling a **Unitree G1** from across the world using a Meta Quest headset.
+### Visualizing in RViz
+We verify the simulation by looking at the data in RViz.
+*   **Point Cloud**: Does the virtual wall match the dots?
+*   **Frames**: Is the camera mounted upside down? (Common error).
 
-## 2. The Bridge: Unity-Robotics-Hub
+### Industry Vocab
+*   **Intrinsic Matrix**: The camera's focal length and center point.
+*   **Bias stability**: How much the IMU drifts over time.
+*   **Shadowing**: When objects block the LiDAR beam.
 
-To connect Unity to our ROS 2 nervous system, we use the **Unity-Robotics-Hub** and the **ROS-TCP-Connector**.
-
-1.  **Unity Side**: A C# script acts as a TCP server.
-2.  **ROS Side**: A Python node acts as a TCP client.
-3.  **The Flow**: ROS sends `JointState` messages $\rightarrow$ Unity applies rotations $\rightarrow$ Unity sends `Image` messages back to ROS.
-
-### Defensive Integration: Latency and Dropouts
-*   **The Trap**: TCP is a "Reliable" protocol. If the network jitters, Unity will wait for the missing packet, causing the robot visualization to "Stutter."
-*   **The Defensive Fix**: For visualization, use **UDP** if possible, or implement a **Jitter Buffer** in Unity that smooths out the incoming motor angles using interpolation.
-
-## 3. Practical Scenario: Visualizing the G1 in Unity
-
-### Steps to Mastery
-1.  **URDF Importer**: Open Unity, import the URDF Importer package, and drag your `g1.urdf` into the scene. Unity automatically builds the GameObject hierarchy.
-2.  **Shader Mapping**: High-fidelity meshes from Unitree often need custom shaders to look realistic under virtual office lighting.
-3.  **Clock Sync**: Ensure Unity is running on the `/clock` topic. If Unity is at 60fps and the balance loop is at 500Hz, you must use **Interpolation** to avoid visual flickering.
-
-### Defensive Coding: Data Validation in C#
-
-```csharp
-// DEFENSIVE: Unity C# Subscriber
-void OnMessageReceived(RosJointState msg) {
-    for(int i=0; i < msg.name.Length; i++) {
-        // PARANOID: Check for NaN or Inf before applying to Transform
-        if (float.IsNaN(msg.position[i])) {
-            Debug.LogError("CRITICAL: NaN received from ROS! Ignoring joint update.");
-            continue;
-        }
-        
-        // Apply rotation with Handedness conversion (Right to Left)
-        ApplyRotationToGameObject(msg.name[i], msg.position[i]);
-    }
-}
+### Code Example: Sensor SDF
+```xml
+<!-- Defensive Sensor Definition with Noise -->
+<sensor name="imu_sensor" type="imu">
+  <always_on>true</always_on>
+  <update_rate>1000</update_rate>
+  <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+    <topicName>imu/data</topicName>
+    <bodyName>imu_link</bodyName>
+    <updateRateHZ>1000.0</updateRateHZ>
+    <gaussianNoise>0.005</gaussianNoise> <!-- Defensive: Simulation of real-world noise -->
+    <xyzOffset>0 0 0</xyzOffset>
+    <rpyOffset>0 0 0</rpyOffset>
+  </plugin>
+</sensor>
 ```
 
-## 4. Critical Edge Cases: Coordinate Handedness
-
-This is the #1 cause of "Broken Robots" in Unity.
-*   **ROS 2**: Right-Handed (Z is up, X is forward).
-*   **Unity**: Left-Handed (Y is up, Z is forward).
-*   **The Fix**: The `URDF-Importer` usually handles this, but if you write custom scripts, you must swap the Y and Z axes and invert the rotation direction. **Always verify with a "Base Axes" marker.**
-
-## 5. Analytical Research: Human-in-the-Loop (HITL)
-
-Research focuses on using Unity for **Teleoperation**.
-*   **Immersive Control**: A human wearing a VR suit moves their arms; Unity captures the motion, calculates Inverse Kinematics, and sends the targets to the real G1 via ROS 2.
-*   **Research Question**: How does **Haptic Feedback Jitter** impact the human's ability to pick up fragile objects? 
-    *   *Result*: Jitter > 20ms leads to a 50% increase in "Object Crushing" events.
-
-## 6. Multi-Level Summary
-
-### [Beginner]
-Unity makes your robot look "Real." It's like putting a skin on the Lego skeleton we built in Lesson 2. It allows you to see what the robot sees from its own virtual cameras.
-
-### [Pro/Expert]
-Unity is our **Synthetic Data Factory**. We use it to generate 100,000 images of "Cups on Tables" with different lighting to train our vision models, avoiding the need for manual photo labeling.
-
-### [Researcher]
-We are studying **Mixed Reality Twins**. By overlaying the Unity "Ghost" robot on top of the real robot's video feed, we can visualize the AI's *intended* plan versus its *actual* execution, detecting discrepancies in real-time.
-
-## 7. Conclusion of Module 2
-
-You have mastered the Virtual World. You can build a robot skeleton, simulate its physics, emulate its sensors, and visualize it in photorealistic 3D. In Module 3, we leave the open-source world of Gazebo and enter the high-speed, GPU-accelerated universe of **NVIDIA Isaac**.
-
----
-
-**Next Module**: [Chapter 4: NVIDIA Isaac Platform](../chapter4/module3-overview)
+## Real-World Use Case: Blind Spots
+We use simulation to find the blind spots of the G1. By visualizing the LiDAR rays in Gazebo, we realize that the robot cannot see small objects directly in front of its toes. We then add a secondary downward-facing depth camera to the design to cover this "dead zone."

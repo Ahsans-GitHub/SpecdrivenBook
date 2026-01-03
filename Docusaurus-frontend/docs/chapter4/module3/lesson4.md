@@ -1,86 +1,56 @@
 ---
-title: "Lesson 4: Sim-to-Real Transfer Techniques"
-sidebar_label: "Lesson 4: Sim-to-Real"
-tags: [sim-to-real, domain-randomization, system-identification, latency, jetson]
-level: [beginner, normal, pro, advanced, research]
-description: "Bridging the Reality Gap: Ensuring that AI policies trained in pixels can handle the messy physics of physical hardware."
+id: lesson4
+title: Nav2 Path planning for bipedal humanoid movement
+sidebar_label: Sim-to-real transfer techniques
 ---
 
-import LevelToggle from '@site/src/components/LevelToggle';
+# Nav2: Path planning for bipedal humanoid movement.
 
-<LevelToggle />
+## Heading Breakdown
+**Nav2: Path planning for bipedal humanoid movement** adapts the standard navigation stack for walking robots. **Nav2** is the second generation of the ROS Navigation stack, built on behavior trees. **Path planning** is the calculation of a trajectory (list of points) to a goal. **Bipedal humanoid movement** adds a layer of complexity: unlike a wheeled robot, a humanoid can step over small obstacles but cannot turn in place instantly without stepping. The importance is **mobility**; a robot that can see but cannot move is a statue. Real usage involves tuning the **DWB (Dynamic Window Approach)** controller to generate velocity commands that match the **Unitree G1**'s walking gait frequency. An example is setting a "stair cost" in the costmap so the robot prefers the ramp but will take the stairs if necessary. This is key for **upgradable systems** where we might upgrade the legs to be more agile, requiring a retuning of the planner.
 
-# Lesson 4: Sim-to-Real Transfer Techniques
+*(Note: Sidebar refers to Sim-to-Real, but per mapping, we cover Nav2 here).*
 
-## 1. The Reality Gap is a Wall
+## Training Focus: Navigation Semantics
+We focus on **safety**.
+*   **Costmaps**: Layers of danger (inflation layer, obstacle layer).
+*   **Recovery Behaviors**: What to do when stuck (e.g., "backup", "spin").
 
-If you train a humanoid to walk in a perfect simulation and then deploy that brain to a real **Unitree G1**, it will fall over in three seconds. This is the **Reality Gap**. 
+## Detailed Content
+### The Nav2 Architecture
+*   **Planner Server**: Global path (A*, Dijkstra).
+*   **Controller Server**: Local path following (DWB, MPC).
+*   **Behavior Tree**: The logic (Sequence, Fallback).
 
-No simulator, not even NVIDIA Isaac Sim, can model the world perfectly.
-*   **Latency**: In sim, commands are instant. In reality, there is a 5ms delay between the Jetson and the motors.
-*   **Friction**: In sim, floor friction is a constant. In reality, it changes if the robot walks over a dust bunny or a wet spot.
-*   **Mass**: Your URDF says the arm is 1.2kg. In reality, the wiring and grease make it 1.25kg.
+### Bipedal Constraints
+*   **Footprint**: A humanoid's footprint changes as it walks. We approximate it with a radius.
+*   **Sway**: Humanoids sway side-to-side. The planner must account for this to avoid hitting doorframes.
 
-Sim-to-Real transfer is the art of making your AI brain "Gap-Proof."
+### Industry Vocab
+*   **Holonomic**: Can move in any direction (humanoids are pseudo-holonomic).
+*   **Voxel Grid**: 3D representation of obstacles.
+*   **BT (Behavior Tree)**: XML logic flow.
 
-## 2. Domain Randomization (DR): The Master Tool
-
-The most successful strategy for crossing the gap is **Domain Randomization**. Instead of simulation being one "Perfect World," we make it millions of "Slightly Broken Worlds."
-
-During training, we randomly change the physics parameters for every robot instance:
-1.  **Mass**: The robot is 5kg, then 6kg, then 4.5kg.
-2.  **Friction**: The floor is "Ice," then "Sandpaper."
-3.  **Latency**: We add random delays (1ms to 10ms) to the control loop.
-4.  **Sensor Noise**: We add jitter to the IMU and joint encoders.
-
-**The result**: The AI learns a policy that works across *all* these variations. When it finally hits the real world, it perceives reality as just another "Random Variation" it has already mastered.
-
-## 3. System Identification (SysID)
-
-For high-precision tasks (like a humanoid using a screwdriver), randomization isn't enough. You need **SysID**.
-*   **Method**: You move the real robot arm in a known pattern and measure the torque. You then use an optimization algorithm to calculate the *exact* physical constants (Mass, Inertia, Friction) of the real hardware.
-*   **Application**: Update your Isaac Sim USD file with these measured numbers. This shrinks the "Gap" before you even start training.
-
-## 4. Practical Scenario: Measuring Jetson Latency
-
-To ensure your AI "expects" the delay of the Jetson Orin:
-1.  **Benchmark**: Use `ros2 topic echo --clock` to measure the time difference between a sensor message and a motor command.
-2.  **Inject**: In your Python training script, use a buffer to "Delay" the actions sent to the simulator by that exact amount.
-
-```python
-# DEFENSIVE: Simulating real-world latency during AI training
-class LatencyBuffer:
-    def __init__(self, delay_steps: int):
-        self.buffer = []
-        self.delay = delay_steps
-
-    def get_safe_action(self, new_action):
-        self.buffer.append(new_action)
-        if len(self.buffer) > self.delay:
-            return self.buffer.pop(0)
-        return np.zeros_like(new_action) # Initially stand still
+### Code Example: Custom Behavior Tree
+```xml
+<!-- Defensive Behavior Tree -->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+      <PipelineSequence name="NavigateWithReplanning">
+        <RateController hz="1.0">
+          <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+        </RateController>
+        <FollowPath path="{path}" controller_id="FollowPath"/>
+      </PipelineSequence>
+      <SequenceStar name="RecoveryActions">
+        <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+        <Wait wait_duration="5"/> <!-- Wait for balance to stabilize -->
+      </SequenceStar>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>
 ```
 
-## 5. Critical Edge Cases: The "Hardware-in-the-Loop" (HIL)
-
-Sometimes, you can't simulate the communication stack.
-*   **HIL**: You connect the physical Jetson Orin from the G1 to your RTX Workstation. The simulator provides the "Eyes" (Virtual Images), but the "Brain" runs on the real robot hardware.
-*   **Defensive Tip**: This catches bugs in your OS, thermal throttling issues, and driver conflicts that simulation will never show you.
-
-## 6. Analytical Research: Zero-Shot Transfer
-
-Current research is moving toward **Zero-Shot Transfer**—policies that work on real hardware the very first time.
-*   **Technique: Feature Alignment**. We use an AI to "Clean" the messy real-world camera feed so it looks like the clean "Sim" feed before the brain sees it.
-*   **Research Question**: Can we use **Foundation Models** (trained on 10,000 different robots) to provide a "Universal Balance" policy that doesn't need sim-to-real tuning for the Unitree G1?
-
-## 7. Defensive Sim-to-Real Checklist
-*   [ ] Did you randomize mass by at least ±10%?
-*   [ ] Did you add 5ms of "Action Latency" during training?
-*   [ ] Is the robot's real-world environment well-lit (to match sim visuals)?
-*   [ ] **Paranoid Step**: Before full walking, test the policy on a "Suspended Gantry" (robot hanging from a rope) to see if it moves legs correctly without falling.
-
----
-
-**Conclusion of Module 3**: You have built the instincts. Your robot can see, it can learn, and it can survive the transition to atoms. In the final module, we move to the "Thinking" layer: **Vision-Language-Action (VLA)**.
-
-**Next Module**: [Chapter 5: Vision-Language-Action (VLA) & Capstone](../chapter5/module4-overview)
+## Real-World Use Case: Crowds
+Navigating a G1 through a crowded hallway. We use the **Social Costmap Layer** to create "repulsion zones" around people, ensuring the robot doesn't invade personal space while squeezing through the crowd.

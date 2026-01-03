@@ -1,6 +1,6 @@
 ---
-title: "Lesson 4: Sensor Systems (LIDAR, Cameras, IMUs, Force/Torque)"
-sidebar_label: "Lesson 4: Sensors"
+title: "Sensor Systems (LIDAR, Cameras, IMUs, Force/Torque)"
+sidebar_label: "Sensors"
 tags: [sensors, perception, lidar, camera, imu, realsense]
 level: [beginner, normal, pro, advanced, research]
 description: "The eyes, ears, and inner ear of the humanoid: A technical deep dive into robotic perception hardware."
@@ -10,7 +10,7 @@ import LevelToggle from '@site/src/components/LevelToggle';
 
 <LevelToggle />
 
-# Lesson 4: Sensor Systems (LIDAR, Cameras, IMUs, Force/Torque)
+# Sensor Systems (LIDAR, Cameras, IMUs, Force/Torque)
 
 ## 1. Perception is Reality
 

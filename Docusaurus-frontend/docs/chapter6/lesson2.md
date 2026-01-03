@@ -1,6 +1,6 @@
 ---
-title: "Lesson 2: Speech Recognition and Natural Language Understanding"
-sidebar_label: "Lesson 2: Speech & NLU"
+title: "Speech Recognition and Natural Language Understanding"
+sidebar_label: "Speech & NLU"
 tags: [whisper, stt, nlp, robotics, jetson]
 level: [beginner, normal, pro, advanced, research]
 description: "Implementing robust voice interaction using OpenAI Whisper and local NLU techniques."
@@ -10,7 +10,7 @@ import LevelToggle from '@site/src/components/LevelToggle';
 
 <LevelToggle />
 
-# Lesson 2: Speech Recognition and Natural Language Understanding
+# Speech Recognition and Natural Language Understanding
 
 ## 1. The Audio Pipeline
 
@@ -78,3 +78,4 @@ The robot needs to know its current position and orientation to understand "left
 ---
 
 **Summary**: Speech is the most natural way for humans to interact with humanoids. By combining Whisper with robust VAD and noise filtering, we turn a noisy robot into an attentive listener.
+

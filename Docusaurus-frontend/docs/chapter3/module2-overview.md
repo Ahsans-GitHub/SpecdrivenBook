@@ -1,80 +1,58 @@
 ---
-title: "Module 2 Overview: Robot Simulation"
-sidebar_label: "Module 2 Overview"
-description: "Mastering the Digital Twin: Physics engines, high-fidelity simulation, and bridging the Sim-to-Real gap."
-tags: [simulation, gazebo, unity, module-overview, digital-twin, weeks-6-7]
-level: [beginner, normal, pro, advanced, research]
+id: module2-overview
+title: Module 2 The Digital Twin (Gazebo & Unity)
+sidebar_label: Module 2 Overview
 ---
 
-import LevelToggle from '@site/src/components/LevelToggle';
+# Module 2: The Digital Twin (Gazebo & Unity) -> Weeks 6-7: Robot Simulation with Gazebo
 
-<LevelToggle />
+## Module Heading Breakdown
+**The Digital Twin (Gazebo & Unity)** defines the essential virtual replica framework needed for modern robotics. **The** implies a singular, authoritative copy of the physical system. **Digital** refers to the computational nature of the model, residing in bits rather than atoms. **Twin** establishes the concept of synchronization—the virtual robot should behave exactly like the real one. This is a physics-based environment for robot prototyping, vital for **closing sim-to-real gaps** in humanoid dynamics. Real usage involves running collision detection on a Jetson-simulated **Unitree Go2** before turning on the motors. An example is a Gazebo plugin using `gz::physics::SetGravity` to simulate Mars gravity for space robotics. This module is key for training **upgradable high-DoF systems**, allowing us to test modular sensor plugins (like a new depth camera) virtually. **Gazebo** is the open-source engine for high-fidelity physics, launched via `gz sim -v 4 worlds/robot.sdf`. **Unity** adds a layer of high-fidelity visualization, using ray-tracing (`UnityEngine.Physics.Raycast`) to simulate how light interacts with optical sensors, crucial for testing vision algorithms.
 
-# Module 2: Robot Simulation (Weeks 6–7)
+## What We Gonna Learn
+Learners will delve into **Gazebo's simulation environment setup** for creating virtual labs, understanding **URDF and SDF formats** for robot modeling. We will move beyond simple boxes and cylinders to importing complex CAD meshes of humanoid parts. You will learn to **simulate physics and sensors** for realistic interactions, modeling how a rubber foot slips on a tiled floor versus a carpet. We will integrate **Unity for high-fidelity visualization**, bridging digital twins with physical humanoid behaviors. This includes setting up a **ROS-Unity Bridge** to stream joint angles from ROS 2 into Unity, allowing you to see your robot move in a photorealistic VR environment.
 
-## 1. The Virtual Imperative: Why We Simulate
+## Highlights and Key Concepts
+*   **Highlight**: **URDF as Unified Robot Description Format**. This is the standard for modular joint definitions. We will build a URDF from scratch, defining parent-child relationships and rotation limits.
+*   **Key Concept**: **SDF (Simulation Description Format)**. While URDF describes the robot, SDF describes the world. We will use SDF to incorporate collision meshes and inertial properties (mass matrix) for accurate sensor emulation.
+*   **Highlight**: **Physics Engines (Dart, Bullet, ODE)**. We will compare how different solvers handle contact dynamics. For a walking robot, a "stiff" solver is needed to prevent the feet from sinking into the ground.
+*   **Key Concept**: **Visual vs. Collision Geometry**. Learning to use high-poly meshes for looking good (Visual) and simple primitives for calculating physics fast (Collision).
 
-In the world of Physical AI, simulation is not a convenience; it is a **Mission-Critical Necessity**. Training a humanoid robot to walk, navigate, or manipulate objects in the real world is slow, expensive, and physically dangerous. A single logic error in a torque controller can result in thousands of dollars of hardware damage or a broken **Unitree G1** hip joint.
+## Summaries of Outcomes
+*   **Part 1**: Students will gain expertise in creating custom Gazebo worlds, populating them with obstacles and actors.
+*   **Part 2**: Students will master the conversion of CAD models (SolidWorks/Fusion360) into URDF/SDF formats.
+*   **Part 3**: Outcomes include robust sensor simulation, enabling accurate modeling of LiDAR and IMUs for humanoid perception, with outcomes like robust collision handling.
+*   **Part 4**: Learners will achieve proficiency in Unity integration, enabling adaptive sensor simulations for edge-case testing in humanoid environments.
 
-**Robot Simulation** allows us to create a **Digital Twin**—a high-fidelity mathematical model of our robot and its environment. In this module, we leave the command line and enter the world of 3D physics engines. We will explore how to build virtual worlds where gravity is a variable, friction is a parameter, and time can be accelerated 100x to speed up learning.
+## Adaption to Real Robots (Unitree G1/Go2 & Jetson)
+*   **Scenario**: **Adapt Gazebo simulations to real Jetson hardware**. We will verify that the camera resolution and frame rate in simulation match the specs of the real Realsense camera on the Unitree Go2.
+*   **Calibrating URDF**. We will perform experiments to measure the "real" friction of the G1's feet and update the URDF `<friction>` tags to match, ensuring the sim walk behaves like the real walk.
+*   **Hardware-in-the-Loop (HIL)**. We will run the physics on a powerful desktop but run the ROS 2 control nodes on the actual Jetson, connected via Ethernet, to test the compute limits of the embedded hardware.
 
-## 2. Learning Outcomes: The Architect of Reality
+## Learning Outcomes
+*   **Outcome**: Proficiency in **Unity integration** for HRI visualization, enabling you to test how humans react to robot gestures in VR.
+*   **Outcome**: Mastery of **inertial modeling**, understanding how errors in the Center of Mass (CoM) definition can cause a real robot to fall.
+*   **Outcome**: Ability to write **Gazebo Plugins** in C++ to simulate custom actuators or environmental forces (like wind).
+*   **Outcome**: Creation of a **validated Digital Twin**, ready for RL training.
 
-By the end of this two-week module, you will have moved from writing "Brains" (code) to building "Worlds." You will be able to:
+## Different Scenarios
+*   **Simulated**: **Multi-physics collisions**. We will simulate a humanoid falling down stairs to test the durability of the virtual chassis and the response of the IMU.
+*   **Real**: **URDF calibration on Go2**. We use a force gauge to measure joint torque limits and update the URDF `<effort>` tags.
+*   **Edge Cases**: **Overload in Unity**. We test what happens when the VR scene is too complex, causing frame drops, and how to optimize assets for real-time HRI.
+*   **Upgradable**: **SDF extensions**. We create a "mounting point" system in our robot description so we can easily attach different end-effectors (hands, grippers) in simulation.
 
-1.  **Configure** a high-fidelity simulation environment using **Gazebo Harmonic/Fortress**, the industry standard for open-source robotics.
-2.  **Author** complex robot descriptions using **URDF** (Unified Robot Description Format) and **SDF** (Simulation Description Format), defining the skeleton and mass of your humanoid.
-3.  **Model** physical interactions with surgical precision, including friction coefficients, contact dynamics, and sensor noise injection.
-4.  **Integrate** the **Unity Game Engine** as a photorealistic frontend for ROS 2, enabling high-fidelity visualization and Human-in-the-Loop simulation.
-5.  **Identify and Mitigate** the "Reality Gap," understanding when a simulator is helping you and when it is lying to you.
-
-## 3. The Digital Twin: Source of Truth
-
-A Digital Twin is more than just a 3D model. It is a synchronized virtual representation that mirrors the state, behavior, and physical properties of its real-world counterpart.
-
-### Fidelity Strata
-1.  **Visual Fidelity**: Does it look like the robot? (Unity focus).
-2.  **Kinematic Fidelity**: Do the joints move in the same way? (URDF focus).
-3.  **Dynamic Fidelity**: Does it have the same mass and inertia? (Physics engine focus).
-4.  **Interaction Fidelity**: Does it slip on the floor the same way the real robot does? (The "Sim-to-Real" frontier).
-
-## 4. Hardware and Platforms: Unitree G1 & Go2
-
-Throughout this module, we use the **Unitree G1** (Humanoid) and **Unitree Go2** (Quadruped) as our reference platforms. We will learn how to load their official CAD meshes, configure their motor controllers in simulation, and emulate their onboard sensors (Lidar and Depth Cameras).
-
-### The Computational Load
-Simulation is GPU-intensive. 
-*   **The Trap**: Running Gazebo on a laptop without a dedicated GPU will result in low frame rates and unstable physics.
-*   **The Solution**: We will explore how to optimize collision geometry—simplifying the "Invisible Skeleton" of the robot so the physics engine can run at 1000Hz while the visuals run at 60Hz.
-
-## 5. Defensive Simulation: The Paranoid Engineer's Rule
-
-Simulation can be addictive because it is "Perfect." But perfection is the enemy of robustness.
-*   **Rule 1: Always Add Noise**. A simulated sensor that gives "0.000000" error is a dangerous sensor. We will learn to inject Gaussian noise into our virtual LIDAR and IMUs.
-*   **Rule 2: The Kraken Check**. High-frequency humanoid balance loops often cause physics engines to "explode" (mathematical divergence). We will learn to tune the **Physics Time Step** to prevent our virtual G1 from vibrating into infinity.
-
-## 6. Analytical Research: The Physics of Contact
-
-For our research-tier learners, we will dive into the math of **Contact Solvers**.
-*   **ODE vs. Bullet vs. DART**: Comparing the stability of different solvers when simulating the complex foot-impact forces of a 50kg biped.
-*   **Domain Randomization**: Why training a robot on "Infinite variations of slightly wrong friction" is better than training it on "One perfect floor."
-
-## 7. Module Roadmap
-
-### [Lesson 1: Gazebo Simulation Environment Setup](./module2/lesson1)
-The infrastructure: installing Gazebo, configuring the ROS-Sim bridge, and creating your first virtual laboratory.
-
-### [Lesson 2: URDF and SDF Robot Description Formats](./module2/lesson2)
-The blueprint: defining the robot's mass, inertia, and visual identity using XML and Xacro macros.
-
-### [Lesson 3: Physics Simulation and Sensor Simulation](./module2/lesson3)
-The interaction: mastering friction, restitution (bounciness), and emulating real-world sensors like the Intel RealSense.
-
-### [Lesson 4: Introduction to Unity for Robot Visualization](./module2/lesson4)
-The presentation: bridging ROS 2 to Unity for photorealistic HRI (Human-Robot Interaction) and VR-based control.
-
----
-
-**Summary**: Module 2 is where your code meets the world. You are no longer just a programmer; you are a creator of environments. Mastering simulation is the only way to survive the high stakes of Physical AI.
-
-**Next Step**: Start with [Lesson 1: Gazebo Setup](./module2/lesson1).
+## Industry Vocab & Code Snippets
+*   **Vocab**: "Xacro" (XML Macros), "Inertia Tensor" (rotational mass), "Mesh Collider" (complex hit detection).
+*   **Integration Example**:
+    ```xml
+    <!-- Defensive URDF Joint Definition -->
+    <joint name="knee_joint" type="revolute">
+      <parent link="thigh"/>
+      <child link="shin"/>
+      <origin xyz="0 0 -0.4" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <!-- Safety Controller: Soft limits to prevent hardware damage -->
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.0" soft_upper_limit="0.0"/>
+      <limit lower="-2.1" upper="0.0" effort="100" velocity="5.0"/>
+    </joint>
+    ```

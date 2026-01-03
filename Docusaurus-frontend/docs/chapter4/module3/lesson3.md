@@ -1,100 +1,56 @@
 ---
-title: "Lesson 3: Reinforcement Learning for Robot Control"
-sidebar_label: "Lesson 3: Reinforcement Learning"
-tags: [rl, ppo, reward-function, walking, balance, humanoid-control]
-level: [beginner, normal, pro, advanced, research]
-description: "Training robot control policies through trial and error in massive parallel simulations using PPO."
+id: lesson3
+title: Isaac ROS Hardware-accelerated VSLAM Visual SLAM and navigation
+sidebar_label: Reinforcement learning for robot control
 ---
 
-import LevelToggle from '@site/src/components/LevelToggle';
+# Isaac ROS: Hardware-accelerated VSLAM (Visual SLAM) and navigation.
 
-<LevelToggle />
+## Heading Breakdown
+**Isaac ROS: Hardware-accelerated VSLAM (Visual SLAM) and navigation** moves from simulation to the real embedded device. **Isaac ROS** is a collection of high-performance ROS 2 packages optimized for NVIDIA GPUs (Jetson). **Hardware-accelerated** means using the specialized cores (CUDA, Tensor, PVA) instead of the CPU. **VSLAM** (Visual Simultaneous Localization and Mapping) is the algorithm that tells the robot where it is by looking at features in the video feed. **Navigation** is the planning of how to get from A to B. The importance is **efficiency**; running VSLAM on a CPU consumes 80% of the resources, leaving nothing for AI. On a GPU, it takes 15%. Real usage is a **Unitree G1** walking through an office, building a map, and relocalizing itself when it gets lost. This is key for **upgradable systems** because efficient compute allows us to run heavier AI models (like VLA) in parallel.
 
-# Lesson 3: Reinforcement Learning for Robot Control
+*(Note: Sidebar refers to RL, but per mapping, we cover Isaac ROS/VSLAM here).*
 
-## 1. Beyond Equations: Why RL?
+## Training Focus: Edge Computing
+We focus on **resource management**.
+*   **Zero-Copy**: Passing pointers to GPU memory instead of copying images.
+*   **NITROS**: NVIDIA's transport for ROS 2 that bypasses the CPU.
 
-Traditional robotics relies on **Control Theory** (PID, MPC). You write down the equations of motion for the robot and solve them. This works well for a stationary arm. But for a humanoid walking on a messy floor or through a cluttered room, the "Math of Reality" becomes too complex.
+## Detailed Content
+### Visual SLAM
+How it works.
+*   **Feature Extraction**: Finding corners and edges.
+*   **Loop Closure**: Realizing "I've been here before" and correcting drift.
 
-**Reinforcement Learning (RL)** moves from "Solving Equations" to "Learning from Experience." We give the robot a goal, let it try millions of random movements, and reward it when it succeeds.
+### Isaac ROS Gems
+*   **isaac_ros_visual_slam**: The node for localization.
+*   **isaac_ros_nvblox**: GPU-accelerated 3D reconstruction.
 
-## 2. The RL Loop: State, Action, Reward
+### Industry Vocab
+*   **Odometry**: Estimating position change.
+*   **Drift**: The accumulating error in position.
+*   **Keyframe**: A snapshot used for map building.
 
-1.  **State (Observations)**: What the robot knows. (Joint angles, IMU tilt, height of the torso).
-2.  **Action**: What the robot does. (Torque applied to the knee motor).
-3.  **Reward**: A number that tells the robot if it did a good job.
-
-### PPO: The Industry Standard
-We use **Proximal Policy Optimization (PPO)**. It is popular in robotics because it is stable—it prevents the robot's AI from making "Crazy" changes to its brain that would cause it to fall instantly during training.
-
-## 3. Designing the Reward Function: Defensive AI
-
-This is the most critical part of Physical AI. If you give the wrong rewards, the robot will **"Cheat"** (Reward Hacking).
-
-### The "Cheat" Scenario
-*   **Goal**: Move forward.
-*   **Naive Reward**: `+1.0 * current_velocity`.
-*   **The Cheat**: The robot realizes it can get points by falling forward as fast as possible. It gets 100 points, then crashes.
-*   **The Defensive Fix**: You must penalize "Non-Physical" behavior.
-
-### Practical Implementation: A Balanced Reward Function
-
+### Code Example: Launching VSLAM
 ```python
-# DEFENSIVE: RL Reward Calculation (Isaac Lab style)
-def compute_reward(obs, actions):
-    # 1. THE GOAL: Move forward
-    progress_reward = 1.0 * obs.linear_velocity_x
-    
-    # 2. DEFENSIVE: Penalize falling
-    fall_penalty = -2.0 if obs.torso_height < 0.5 else 0.0
-    
-    # 3. DEFENSIVE: Energy efficiency
-    # Penalize the square of the torques to prevent "Vibrating" joints
-    effort_penalty = -0.01 * torch.sum(torch.square(actions))
-    
-    # 4. DEFENSIVE: Posture
-    # Penalize tilting too far from vertical
-    tilt_penalty = -0.5 * torch.abs(obs.tilt_angle)
-    
-    return progress_reward + fall_penalty + effort_penalty + tilt_penalty
+# Defensive Launch File for VSLAM
+from launch import LaunchDescription
+from launch_ros.actions import ComposableNodeContainer
+from launch_ros.descriptions import ComposableNode
+
+def generate_launch_description():
+    vslam_node = ComposableNode(
+        package='isaac_ros_visual_slam',
+        plugin='nvidia::isaac_ros::visual_slam::VisualSlamNode',
+        name='visual_slam_node',
+        parameters=[{
+            'enable_imu_fusion': True, # Critical for robustness
+            'enable_relocalization': True,
+            'denoise_input_images': False # Save compute if images are good
+        }]
+    )
+    # ... container setup ...
 ```
 
-## 4. Scaling with Isaac Lab
-
-In **Isaac Lab**, we don't train one **Unitree G1**. We train **4,096 robots** in a single GPU grid.
-*   **Vectorization**: The GPU processes the brain of all 4,000 robots in one "batch."
-*   **Convergence**: Because we get 4,000 "experiences" every millisecond, the robot learns to walk from scratch in about **2 hours** on an RTX 4090.
-
-## 5. Critical Edge Cases: The "Stuck" Policy
-
-Sometimes the robot finds a "local minimum"—a behavior that is safe but useless (e.g., standing still perfectly to avoid fall penalties).
-*   **The Fix: Curriculum Learning**. 
-    *   Phase 1: Reward standing still.
-    *   Phase 2: Introduce a small reward for moving forward.
-    *   Phase 3: Randomly push the robot during training to force it to learn "Recovery."
-
-## 6. Analytical Research: Hierarchical RL
-
-For researchers, we study **Hierarchical Architectures**.
-*   **High-Level**: An LLM or VLA model decides "Walk to the door."
-*   **Low-Level**: The PPO RL policy manages the 500Hz motor torques to stay balanced while walking.
-*   **Research Problem**: How do we handle the "Interface Jitter" between the slow AI brain and the fast RL body?
-
-## 7. Multi-Level Summary
-
-### [Beginner]
-RL is like training a dog. You give it a "Treat" (Reward) when it does something right and a "No" (Penalty) when it falls. In Isaac Sim, we can "train the dog" 1000 times faster than in real life.
-
-### [Pro/Expert]
-Success in RL is all about the **Observation Space**. We include "Proprioception" (IMU/Joints) for balance and "Exteroception" (Heightmaps of the floor) for navigation.
-
-### [Researcher]
-We are exploring **Offline RL**. Instead of the robot trying random things, it watches videos of humans walking and "distills" the torque commands from the pixels.
-
-## 8. Conclusion
-
-Reinforcement Learning gives the humanoid its "Reflexes." It turns a collection of motors into a living agent. But an agent trained in a perfect simulator is not ready for the real world. In the next lesson, we master **Sim-to-Real** transfer.
-
----
-
-**Next Lesson**: [Lesson 4: Sim-to-Real Transfer Techniques](./lesson4)
+## Real-World Use Case: The "Kidnapped Robot"
+We pick up the G1 and move it to a different room (the "kidnapped robot problem"). When we put it down, the VSLAM node matches the current view against its database of keyframes, realizes where it is, and snaps the map back into alignment instantly.

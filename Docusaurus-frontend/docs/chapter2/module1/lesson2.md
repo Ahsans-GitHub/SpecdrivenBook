@@ -1,130 +1,61 @@
 ---
-title: "Lesson 2: Nodes, Topics, Services, and Actions"
-sidebar_label: "Lesson 2: Communication"
-tags: [ros2, topics, services, actions, communication-patterns]
-level: [beginner, normal, pro, advanced, research]
-description: "Mastering the four patterns of robot communication and knowing exactly when to use each for humanoid control."
+id: lesson2
+title: ROS 2 Nodes, Topics, and Services
+sidebar_label: Nodes, topics, services, and actions
 ---
 
-import LevelToggle from '@site/src/components/LevelToggle';
+# ROS 2 Nodes, Topics, and Services.
 
-<LevelToggle />
+## Heading Breakdown
+**ROS 2 Nodes, Topics, and Services** are the atomic units of the ROS graph. **Nodes** are the executable processes that perform computation—the "neurons" of the robot. **Topics** are the named buses over which nodes exchange messages—the "axons" carrying signals. **Services** are the synchronous request-response interfaces—the "reflexes" where you ask for a specific outcome and wait for it. Understanding these is critical because they define the **computational graph** of the robot. Real usage involves a "Camera Node" publishing images to an "Image Topic," which a "Vision Node" subscribes to. An example is the `/cmd_vel` topic, the universal interface for telling a mobile base how fast to move. This is key for **upgradable high-DoF humanoids** because it decouples the sender from the receiver; you can replace the joystick teleoperation node with an AI path planner node, and the wheel controller doesn't know the difference.
 
-# Lesson 2: Nodes, Topics, Services, and Actions
+## Training Focus: Modular Architecture
+We focus on **decoupling**. A well-architected humanoid system has dozens of nodes. We train you to define clear boundaries.
+*   **Single Responsibility Principle**: A node should do one thing well (e.g., "Face Detection," not "Face Detection and Arm Control").
+*   **Interface Stability**: Topics serve as the contract between modules.
 
-## 1. The Language of the Graph
+## Detailed Content
+### Nodes
+A node in ROS 2 is an object that interacts with the ROS graph.
+*   **Lifecycle**: Nodes can be managed (Unconfigured, Inactive, Active, Finalized).
+*   **Composition**: Multiple nodes can run in a single process to save memory.
 
-In Lesson 1, we learned that ROS 2 is a decentralized graph of **Nodes**. But how do these nodes actually converse? Humanoid robots require different "Conversation Patterns" depending on whether they are streaming high-speed IMU data, asking a vision node to find a cup, or telling the legs to "Walk to the office."
+### Topics (Publish-Subscribe)
+The primary way data moves.
+*   **Many-to-Many**: One publisher can talk to ten subscribers.
+*   **Asynchronous**: The publisher doesn't wait for the subscriber to process the data.
 
-There are four primary patterns in the ROS 2 language: **Topics, Services, Actions, and Parameters**. In this lesson, we dive deep into the first three.
+### Services (Request-Response)
+For "transactions."
+*   **Synchronous**: The client blocks until the server replies.
+*   **Example**: `spawn_entity` in Gazebo.
 
-## 2. Topics: The Broadcast (Pub/Sub)
+### Industry Vocab
+*   **Callback**: A function that runs when a message arrives.
+*   **Spin**: The loop that keeps the node alive and checking for callbacks.
+*   **Service Definition (.srv)**: The file defining the request and response structure.
 
-**Topics** are the most common pattern. They are for **Continuous, Asynchronous Data Streams**.
-
-*   **Analogy**: A Radio Station. One node broadcasts (Publishes) on a frequency, and many nodes can tune in (Subscribe).
-*   **Pattern**: One-to-Many. The broadcaster doesn't know (or care) if anyone is listening.
-*   **Humanoid Use Case**:
-    *   **Joint States**: The robot’s knees and hips constantly publish their current angles (100Hz).
-    *   **Perception**: The camera publishes raw frames (30fps).
-    *   **Commands**: The gait planner publishes "target velocity" to the base controller.
-
-### Defensive Topic Implementation
-
+### Code Example: Typed Publisher
 ```python
-from std_msgs.msg import Float64
+# Defensive Node with Typed Interfaces
+from rclpy.node import Node
+from std_msgs.msg import String
 
-class ElbowController(Node):
+class SupervisorNode(Node):
     def __init__(self):
-        super().__init__('elbow_control')
-        # Topic: /robot/arm/elbow/target
-        self.subscription = self.create_subscription(
-            Float64,
-            '/robot/arm/elbow/target',
-            self.listener_callback,
-            10 # Queue Depth
-        )
+        super().__init__('supervisor_node')
+        # Explicit type declaration prevents serialization errors
+        self.publisher_ = self.create_publisher(String, 'system_status', 10)
+        self.timer = self.create_timer(1.0, self.timer_callback)
+        self.i = 0
 
-    def listener_callback(self, msg: Float64):
-        # DEFENSIVE: Validate range against physical hardware stops
-        # Unitree G1 Elbow limit: 0.0 to 2.5 radians
-        if not (0.0 <= msg.data <= 2.5):
-            self.get_logger().error(f"HARDWARE LIMIT VIOLATION: {msg.data}. Rejecting.")
-            return # Fail Closed (do not move)
-            
-        self.apply_torque(msg.data)
+    def timer_callback(self):
+        msg = String()
+        msg.data = f'System Nominal: {self.i}'
+        self.publisher_.publish(msg)
+        self.get_logger().info(f'Publishing: "{msg.data}"')
+        self.i += 1
 ```
 
-## 3. Services: The Request (Req/Res)
-
-**Services** are for **Instant, Synchronous Interactions**.
-
-*   **Analogy**: A Phone Call. You ask a question, and you wait for an answer.
-*   **Pattern**: One-to-One. The client waits for the server to finish the task and send a response.
-*   **Humanoid Use Case**:
-    *   **Calibration**: "Node A asks Node B to calibrate the IMU."
-    *   **State Change**: "Set the robot to 'Sit' mode."
-    *   **Calculation**: "Calculate the Inverse Kinematics for this hand position."
-
-### Defensive Service Implementation
-
-```python
-from std_srvs.srv import SetBool
-
-def trigger_calibration(self):
-    client = self.create_client(SetBool, 'calibrate_imu')
-    
-    # DEFENSIVE: Never block indefinitely
-    if not client.wait_for_service(timeout_sec=2.0):
-        self.get_logger().error("Calibration service unavailable. Hardware risk!")
-        return
-
-    request = SetBool.Request()
-    request.data = True
-    
-    # DEFENSIVE: Use call_async() to avoid deadlocking the balance thread
-    future = client.call_async(request)
-```
-
-## 4. Actions: The Mission (Goal/Feedback/Result)
-
-**Actions** are for **Long-running, Preemptible Tasks**.
-
-*   **Analogy**: Ordering Pizza. You place the order (Goal). The restaurant tells you "It's in the oven... it's out for delivery" (Feedback). Finally, you get the pizza (Result).
-*   **Pattern**: One-to-One with continuous feedback. Crucially, you can **Cancel** the action mid-way.
-*   **Humanoid Use Case**:
-    *   **Navigation**: "Walk to the kitchen." (Takes 30 seconds, provides distance-to-goal feedback).
-    *   **Manipulation**: "Grasp the bottle." (Slow, high-stakes movement).
-
-### Why use Actions instead of Services?
-If you used a Service to "Walk to the kitchen," the robot's brain would be "blocked" for 30 seconds while waiting for the response. It couldn't see obstacles or stop for a human. Actions run in the background.
-
-## 5. Critical Edge Cases: The "Service Deadlock"
-
-A common mistake for beginners is calling a Service inside a Topic callback using a single-threaded executor.
-*   **The Trap**: Callback A starts -> It calls Service B -> It waits. But the same thread is needed to process the Service B response. The system freezes.
-*   **The Fix**: Use **Reentrant Groups** or **MultiThreadedExecutors**, which we will cover in Lesson 4.
-
-## 6. Analytical Research: Interface Selection
-
-Choosing the right pattern is a system design decision.
-*   **Topic vs Service**: If data needs to be "Fresh" (like a laser scan), use a Topic. If data needs to be "Confirmed" (like a command to lock a joint), use a Service.
-*   **Research Problem**: Analyzing the bandwidth impact of high-frequency Actions. Should "Balance" be an Action? 
-    *   *Result*: No. Balance is too fast (500Hz). Actions have too much overhead. Balance should be a Topic or a direct hardware interface.
-
-## 7. Multi-Level Summary
-
-### [Beginner]
-*   **Topics**: News broadcast (fast, continuous).
-*   **Services**: Phone call (request and wait).
-*   **Actions**: Project manager (do a task, give updates, tell me when done).
-
-### [Pro/Expert]
-Designing a humanoid means minimizing **Graph Jitter**. We use Topics for the control loops and reserved Services for "Safety Interrupts."
-
-### [Researcher]
-We are studying **Zero-Latency Orchestration**. How can we use the ROS 2 Action server to manage VLA (Vision-Language-Action) tasks where the "Feedback" is a video stream processed by a remote LLM?
-
----
-
-**Next Lesson**: [Lesson 3: Building ROS 2 Packages with Python](./lesson3)
+## Real-World Use Case: Unitree G1
+In the G1, the **Battery Node** publishes the voltage to the `/battery_state` topic. The **Safety Node** subscribes to this. If the voltage drops below 20V, the Safety Node triggers a service call to the **Motion Manager** to `enter_crouch_mode`, ensuring the robot sits down safely before power failure.

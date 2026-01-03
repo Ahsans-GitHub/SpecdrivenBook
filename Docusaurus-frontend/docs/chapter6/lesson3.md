@@ -1,6 +1,6 @@
 ---
-title: "Lesson 3: Multi-modal Interaction: Speech, Gesture, Vision"
-sidebar_label: "Lesson 3: Multi-modal Fusion"
+title: "Multi-modal Interaction: Speech, Gesture, Vision"
+sidebar_label: "Multi-modal Fusion"
 tags: [multi-modal, gesture-recognition, sensor-fusion, hri]
 level: [beginner, normal, pro, advanced, research]
 description: "Synthesizing audio and visual cues for intuitive human-robot communication."
@@ -10,7 +10,7 @@ import LevelToggle from '@site/src/components/LevelToggle';
 
 <LevelToggle />
 
-# Lesson 3: Multi-modal Interaction: Speech, Gesture, Vision
+# Multi-modal Interaction: Speech, Gesture, Vision
 
 ## 1. The Power of "And"
 
@@ -67,3 +67,4 @@ Humans have expectations about personal space (**Proxemics**).
 ---
 
 **Summary**: Multi-modal interaction is about **Context**. By looking at the whole human—not just listening to their words—we build robots that feel like intelligent partners rather than awkward machines.
+

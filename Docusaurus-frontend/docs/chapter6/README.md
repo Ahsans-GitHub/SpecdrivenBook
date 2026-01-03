@@ -50,3 +50,4 @@ By fusing these modalities, robots can achieve a more comprehensive and nuanced 
 ### Conclusion
 
 Chapter 6 propels you into the future of Human-Robot Interaction, equipping you with the skills to build conversational robots capable of understanding and responding to the world through speech, vision, and action. This integration of GPT, Whisper, and multimodal AI paves the way for truly intelligent and interactive embodied systems, setting the stage for your capstone projects.
+

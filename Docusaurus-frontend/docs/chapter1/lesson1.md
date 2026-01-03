@@ -1,6 +1,6 @@
 ---
-title: "Lesson 1: Foundations of Physical AI and Embodied Intelligence"
-sidebar_label: "Lesson 1: Foundations"
+title: "Foundations of Physical AI and Embodied Intelligence"
+sidebar_label: "Foundations"
 tags: [physical-ai, embodied-intelligence, foundations, moravec-paradox]
 level: [beginner, normal, pro, advanced, research]
 description: "The ontological shift from digital algorithms to agents that interact with physical reality."
@@ -10,7 +10,7 @@ import LevelToggle from '@site/src/components/LevelToggle';
 
 <LevelToggle />
 
-# Lesson 1: Foundations of Physical AI and Embodied Intelligence
+# Foundations of Physical AI and Embodied Intelligence
 
 ## 1. The Ontological Shift: From Information to Agency
 

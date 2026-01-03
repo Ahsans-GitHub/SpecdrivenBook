@@ -1,84 +1,49 @@
 ---
-title: "Lesson 2: AI-Powered Perception and Manipulation"
-sidebar_label: "Lesson 2: Perception & Manipulation"
-tags: [isaac-ros, perception, vision, jetson, cu-dnn, tensorrt]
-level: [beginner, normal, pro, advanced, research]
-description: "Giving humanoids hardware-accelerated eyes and hands using NVIDIA Isaac ROS and GPU-optimized vision pipelines."
+id: lesson2
+title: NVIDIA Isaac Sim Photorealistic simulation and synthetic data generation
+sidebar_label: AI-powered perception and manipulation
 ---
 
-import LevelToggle from '@site/src/components/LevelToggle';
+# NVIDIA Isaac Sim: Photorealistic simulation and synthetic data generation.
 
-<LevelToggle />
+## Heading Breakdown
+**NVIDIA Isaac Sim: Photorealistic simulation and synthetic data generation** introduces the tool that changes the game. **Photorealistic** means the simulation is visually indistinguishable from reality to the robot's cameras. **Synthetic data generation** is the process of programmatically creating labeled training datasets. **Isaac Sim** is built on Pixar's USD (Universal Scene Description) and NVIDIA's Omniverse, allowing for ray-traced rendering in real-time. The importance is **scalability**; we can create datasets that would take years to collect manually. Real usage involves training a **Unitree G1** to navigate a hospital. We build a digital hospital, populate it with moving doctors and patients, and train the navigation policy. This is key for **upgradable systems** because we can test new sensor configurations (e.g., placing the camera on the chest vs. the head) in simulation to optimize coverage before engineering the bracket.
 
-# Lesson 2: AI-Powered Perception and Manipulation
+## Training Focus: USD & Omniverse
+We focus on **assets**.
+*   **USD**: The HTML of 3D worlds. A layered, non-destructive file format.
+*   **PhysX 5**: The advanced physics engine in Isaac Sim that handles deformable objects (soft bodies).
 
-## 1. The Real-Time Perception Challenge
+## Detailed Content
+### Setting up Isaac Sim
+*   **Nucleus**: The local server for sharing assets.
+*   **Python API**: Controlling the simulator headless.
 
-A humanoid robot like the **Unitree G1** has a high Center of Mass and small feet. To walk autonomously, it must process visual data (to find obstacles) and plan movements (to avoid them) in under 100 milliseconds. If the "Brain" takes 200ms to see a person walking in its path, the robot will collide.
+### Replicator
+The engine for domain randomization.
+*   **Texture Randomization**: Changing the floor from wood to carpet every frame.
+*   **Pose Randomization**: Spawning the cup in different places.
 
-Traditional computer vision (CPU-based OpenCV) is too slow for the Jetson Orin to handle while simultaneously balancing the robot. We use **Isaac ROS**—a suite of hardware-accelerated "Gems" that offload vision tasks to the GPU, DLA (Deep Learning Accelerator), and PVA (Programmable Vision Accelerator) hardware on the Jetson.
+### Industry Vocab
+*   **Headless Mode**: Running simulation without a GUI (for cloud training).
+*   **Ground Truth**: The perfect labels (depth, segmentation) that the simulator provides for free.
+*   **RTX**: Real-Time Ray Tracing.
 
-## 2. Isaac ROS: Hardware-Accelerated Perception
-
-NVIDIA provides optimized ROS 2 packages for the most critical robotic tasks:
-*   **VSLAM (Visual SLAM)**: Uses the RealSense camera to track the robot's position in 3D space with centimeter precision.
-*   **ESS (Stereo Disparity)**: A deep-learning model that creates a high-resolution Depth Map from two RGB cameras.
-*   **FoundationPose**: Tracks the 6D orientation of objects (e.g., "The drill is rotated at 45 degrees") even if they are partially hidden.
-*   **NVBlox**: Builds a 3D "Memory" of the room in real-time, allowing the robot to "remember" obstacles it can no longer see.
-
-## 3. The Defensive Perception Pipeline
-
-When building an AI vision system for a 50kg robot, you must be **Paranoid**.
-
-### Defensive Implementation: Confidence Filtering
-Never trust a neural network's first guess.
-
+### Code Example: Loading USD
 ```python
-# DEFENSIVE: Object detection validation
-def detection_callback(self, msg: Detection3DArray):
-    for det in msg.detections:
-        # 1. CONFIDENCE CHECK
-        # AI might "hallucinate" a person if the confidence is low
-        if det.results[0].score < 0.85:
-            self.get_logger().debug("Rejecting low-confidence AI detection.")
-            continue
-            
-        # 2. RANGE VALIDATION
-        # Project the box center into 3D using depth data
-        dist = calculate_distance(det.bbox.center.position)
-        if dist > 5.0 or dist < 0.1:
-            self.get_logger().error("AI SENSOR ERROR: Object detected at impossible distance!")
-            continue
+# Defensive Asset Loading
+from omni.isaac.core.utils.stage import add_reference_to_stage
+from omni.isaac.core.robots import Robot
 
-        # 3. SAFETY TRIGGER
-        if det.results[0].id == "person" and dist < 1.0:
-            self.trigger_emergency_stop("HUMAN PROXIMITY VIOLATION")
+def load_robot():
+    usd_path = "omniverse://localhost/NVIDIA/Assets/Robots/Unitree/G1/g1.usd"
+    # Check if asset exists before loading to prevent crash
+    if not verify_asset(usd_path):
+        raise FileNotFoundError(f"Asset not found: {usd_path}")
+        
+    add_reference_to_stage(usd_path=usd_path, prim_path="/World/G1")
+    return Robot(prim_path="/World/G1", name="g1")
 ```
 
-### Minimizing the "Perception Age"
-"Perception Age" is the time from when light hits the camera to when the command hits the motors.
-*   **NITROS**: We use **NVIDIA Isaac Transport for ROS (NITROS)**. It uses zero-copy memory pointers to move images between GPU nodes without copying data to the CPU. This reduces latency from 50ms to **under 5ms**.
-
-## 4. Manipulation: cuMotion and MoveIt 2
-
-Perception is "Seeing"; Manipulation is "Doing."
-*   **MoveIt 2**: The standard ROS 2 tool for arm planning.
-*   **cuMotion**: An Isaac ROS accelerator that can calculate collision-free paths for the 7-DoF G1 arm in milliseconds instead of seconds.
-
-## 5. Analytical Research: Adversarial Robustness
-
-For researchers, the challenge is **Adversarial AI**.
-*   **The Problem**: A human wearing a specific "Camouflage" pattern can be invisible to YOLO object detectors.
-*   **The Research Solution**: **Multi-modal Consensus**. The G1 must only believe it sees a clear path if BOTH the RGB camera (AI) and the LIDAR (Physics) agree. If they disagree, the robot defaults to a **Fail-Safe** stop state.
-
-## 6. Defensive Programming Checklist
-*   [ ] Is your inference model optimized using **TensorRT** (FP16 or INT8)?
-*   [ ] Have you enabled **NITROS** for zero-copy image passing?
-*   [ ] Are you syncing your Depth and Color frames using `message_filters`?
-*   [ ] Does the robot have a "Visual Heartbeat" (if the camera feed freezes, the robot sits down)?
-
----
-
-**Summary**: GPU acceleration is not a luxury; it is a requirement for humanoid safety. By offloading perception to the hardware, we ensure that the robot "Sees" the world as it is *now*, not as it was 200ms ago. In the next lesson, we use this perception data to train our robot's **Reflexes** using RL.
-
-**Next Lesson**: [Lesson 3: Reinforcement Learning for Robot Control](./lesson3)
+## Real-World Use Case: Transparent Objects
+Glass is notoriously hard for depth cameras. In Isaac Sim, we simulate the refraction of light through glass. We train a neural network to infer the shape of a glass cup from the distorted background behind it, enabling the G1 to pour water without spilling.

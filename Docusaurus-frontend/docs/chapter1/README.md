@@ -54,3 +54,4 @@ Sensors are the robot's gateway to understanding its environment. Without them, 
 ### Conclusion
 
 Chapter 1 equips you with the foundational knowledge of Physical AI and the indispensable role of sensor systems. You've gained insights into different learning strata, explored various hardware considerations, and understood the critical importance of robust and secure data handling. As we transition to ROS 2 in the next chapter, this understanding will prove invaluable in building intelligent, embodied agents.
+

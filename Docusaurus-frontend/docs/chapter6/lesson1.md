@@ -1,6 +1,6 @@
 ---
-title: "Lesson 1: Integrating GPT Models for Conversational AI in Robots"
-sidebar_label: "Lesson 1: GPT Integration"
+title: "GPT Integration"
+sidebar_label: "GPT Integration"
 tags: [gpt, llm, prompt-engineering, python, ros2]
 level: [beginner, normal, pro, advanced, research]
 description: "Connecting Large Language Models to robot control stacks for natural language reasoning."
@@ -10,7 +10,7 @@ import LevelToggle from '@site/src/components/LevelToggle';
 
 <LevelToggle />
 
-# Lesson 1: Integrating GPT Models for Conversational AI in Robots
+# GPT Integration
 
 ## 1. The Robot's "System Prompt"
 
