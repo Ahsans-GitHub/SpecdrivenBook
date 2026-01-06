@@ -92,7 +92,7 @@ const config: Config = {
           position: 'left',
         },
         {
-          to: '/docs/assessments',
+          to: '/docs/chapter7',
           label: 'Assessments',
           position: 'left',
         },
