@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
         to orchestrate complex humanoid behaviors.
       </>
     ),
-    link: '/docs/chapter2',
+    link: '/docs/chapter2/chapter2-overview',
   },
   {
     title: 'Digital Twin & Physics Sim',
@@ -33,7 +33,7 @@ const FeatureList: FeatureItem[] = [
         virtual labs for safe and scalable AI training.
       </>
     ),
-    link: '/docs/chapter3',
+    link: '/docs/chapter3/chapter3-overview',
   },
   {
     title: 'Hardware & Edge AI',
