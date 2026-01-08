@@ -1,7 +1,6 @@
 ---
 id: intro
 title: Why Physical AI Matters
-slug: /
 ---
 
 # Why Physical AI Matters: A Manifesto for the Age of Embodied Intelligence
