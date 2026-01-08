@@ -1,0 +1,15 @@
+[project]
+name = "rag-backend"
+version = "0.1.0"
+description = "RAG Embeddings Pipeline for Physical AI textbook"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31.0",
+    "cohere>=4.9.0",
+    "qdrant-client>=1.8.0",
+    "python-dotenv>=1.0.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "pytest>=7.4.0",
+]

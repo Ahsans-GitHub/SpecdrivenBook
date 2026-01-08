@@ -1,0 +1,129 @@
+# API Contract: Content Embedding Service
+
+## Overview
+This contract defines the interface for the content embedding service that fetches, processes, and stores content embeddings in the vector database.
+
+## Endpoints
+
+### Process Content URLs
+**Endpoint**: `POST /process_urls`
+**Description**: Process a list of URLs and store their embeddings in the vector database
+
+#### Request
+```json
+{
+  "urls": [
+    "https://example.com/content1",
+    "https://example.com/content2"
+  ],
+  "chunk_size": 1000,
+  "overlap_size": 200,
+  "collection_name": "physical_ai_content"
+}
+```
+
+#### Response
+```json
+{
+  "status": "success",
+  "processed_urls": [
+    {
+      "url": "https://example.com/content1",
+      "success": true,
+      "chunks_processed": 5,
+      "error_message": null,
+      "processing_time": 2.34
+    }
+  ],
+  "total_chunks": 12,
+  "total_processing_time": 5.67
+}
+```
+
+### Health Check
+**Endpoint**: `GET /health`
+**Description**: Check the health status of the embedding service
+
+#### Response
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-01-04T12:00:00Z",
+  "dependencies": {
+    "cohere_api": "connected",
+    "qdrant_db": "connected"
+  }
+}
+```
+
+## Data Models
+
+### ContentChunk
+```json
+{
+  "id": "string",
+  "url": "string (valid URL)",
+  "text": "string (max 2000 chars)",
+  "title": "string",
+  "section": "string",
+  "level": "string (beginner|intermediate|expert)",
+  "tags": ["string"],
+  "embedding": ["float"],
+  "created_at": "timestamp",
+  "processed_at": "timestamp"
+}
+```
+
+### ProcessingResult
+```json
+{
+  "url": "string (valid URL)",
+  "success": "boolean",
+  "chunks_processed": "integer",
+  "error_message": "string (nullable)",
+  "processing_time": "float"
+}
+```
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "error": "invalid_input",
+  "message": "Description of the validation error",
+  "details": {
+    "field": "error_description"
+  }
+}
+```
+
+### 429 Rate Limited
+```json
+{
+  "error": "rate_limited",
+  "message": "API rate limit exceeded, please try again later"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "internal_error",
+  "message": "An unexpected error occurred"
+}
+```
+
+## Security Requirements
+
+- All API keys must be passed through environment variables, not in requests
+- URLs must be validated to prevent SSRF attacks
+- Input text must be sanitized and limited to 2000 characters per chunk
+- All responses must include appropriate error handling
+
+## Performance Requirements
+
+- Process 5 URLs within 60 seconds
+- Generate embeddings with <2 second response time per chunk
+- Store embeddings in vector database within 1 second per chunk
+- Handle up to 1000 content chunks per processing session
