@@ -6,22 +6,19 @@ import re
 load_dotenv()
 
 class Config:
-    """Configuration class to handle environment variables and settings."""
+    """Configuration class to handle environment variables and settings.
+
+    NOTE: Do not raise on import. Call `Config.validate_config()` at runtime
+    when you need to enforce required variables. This prevents import-time
+    crashes when running tools that only need a subset of configuration.
+    """
 
     # Cohere API configuration
     COHERE_API_KEY = os.getenv('COHERE_API_KEY')
-    if not COHERE_API_KEY:
-        raise ValueError("COHERE_API_KEY environment variable is required")
 
     # Qdrant configuration
     QDRANT_API_KEY = os.getenv('QDRANT_API_KEY')
     QDRANT_URL = os.getenv('QDRANT_URL')
-
-    if not QDRANT_API_KEY:
-        raise ValueError("QDRANT_API_KEY environment variable is required")
-
-    if not QDRANT_URL:
-        raise ValueError("QDRANT_URL environment variable is required")
 
     # Vercel deployment URL (optional but if present, should be valid)
     DEPLOY_VERCEL_URL = os.getenv('DEPLOY_VERCEL_URL')

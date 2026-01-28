@@ -66,6 +66,13 @@ const config: Config = {
     ],
   ],
 
+
+  plugins: [
+    './src/plugins/floatingChatbotPlugin',
+  ],
+
+
+
   themeConfig: {
     // Replace with your project's social card
     image: '/img/docusaurus-social-card.jpg',
@@ -103,6 +110,7 @@ const config: Config = {
         },
       ],
     },
+
     footer: {
       style: 'dark',
       links: [
@@ -153,7 +161,7 @@ const config: Config = {
         tagName: 'meta',
         attributes: {
           'http-equiv': 'Content-Security-Policy',
-          content: "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://fonts.gstatic.com https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://*.algolia.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com;",
+          content: "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://fonts.gstatic.com https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://*.algolia.net ; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com;",
         },
       },
     ],
