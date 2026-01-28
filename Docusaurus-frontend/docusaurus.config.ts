@@ -14,8 +14,8 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-site.example.com',
-  // url: 'https://physicalaiandhumanoidrobotics.vercel.app/',
+  // url: 'https://your-docusaurus-site.example.com',
+  url: 'https://physicalaiandhumanoidrobotics.vercel.app/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
@@ -161,7 +161,7 @@ const config: Config = {
         tagName: 'meta',
         attributes: {
           'http-equiv': 'Content-Security-Policy',
-          content: "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://fonts.gstatic.com https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://*.algolia.net http://localhost:8000 ; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com;",
+          content: "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://fonts.gstatic.com https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://*.algolia.net ; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com;",
         },
       },
     ],
