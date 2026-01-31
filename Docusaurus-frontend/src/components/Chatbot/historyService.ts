@@ -105,7 +105,7 @@ class HistoryService {
       // In a real implementation, we would send this to the backend
       // which would then store it in the Neon database
       // The API key would be securely handled on the backend
-      const response = await fetch('http://localhost:8000/history', {
+      const response = await fetch('https://ahsan350-rag.hf.space/history', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ class HistoryService {
         userId: userId || 'anonymous'
       };
 
-      const response = await fetch('http://localhost:8000/history/save', {
+      const fetchResponse = await fetch('https://ahsan350-rag.hf.space/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,8 +149,8 @@ class HistoryService {
         body: JSON.stringify(chatEntry)
       });
 
-      if (!response.ok) {
-        throw new Error(`Save to Neon DB failed with status: ${response.status}`);
+      if (!fetchResponse.ok) {
+        throw new Error(`Save to Neon DB failed with status: ${fetchResponse.status}`);
       }
 
       console.log('Chat entry saved to Neon database successfully');
@@ -166,7 +166,7 @@ class HistoryService {
    */
   async getFromNeonDatabase(userId?: string): Promise<any[]> {
     try {
-      const response = await fetch(`http://localhost:8000/history?userId=${userId || 'anonymous'}`, {
+      const response = await fetch('https://ahsan350-rag.hf.space/chat', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
