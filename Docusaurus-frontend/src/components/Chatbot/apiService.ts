@@ -67,11 +67,11 @@ class ApiService {
       if (typeof window !== 'undefined') {
         // Browser environment
         this.baseURL = process.env.REACT_APP_BACKEND_URL ||
-                      (window.location.hostname === 'localhost' ? 'http://localhost:8000'
+                      (window.location.hostname === 'localhost' ? 'https://ahsan350-rag.hf.space'
                        : window.location.origin); // For production, use the same origin
       } else {
         // Server environment (SSR)
-        this.baseURL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+        this.baseURL = process.env.REACT_APP_BACKEND_URL || 'https://ahsan350-rag.hf.space';
       }
 
       // Create axios instance with default configuration
@@ -109,7 +109,7 @@ class ApiService {
     } catch (error) {
       console.error('Failed to initialize API service:', error);
       // Fallback to a default configuration if initialization fails
-      this.baseURL = 'http://localhost:8000';
+      this.baseURL = 'https://ahsan350-rag.hf.space';
       this.api = axios.create({
         baseURL: this.baseURL,
         timeout: 60000, // Consistent 60 second timeout
