@@ -7,7 +7,7 @@
 const envConfig = {
   development: {
     // Backend API configuration for development
-    BACKEND_URL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000',
+    BACKEND_URL: process.env.REACT_APP_BACKEND_URL || 'https://ahsan350-rag.hf.space',
 
     // Frontend development settings
     FRONTEND_PORT: process.env.PORT || 3000,
